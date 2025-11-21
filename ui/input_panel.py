@@ -312,47 +312,101 @@ class InputPanel(ctk.CTkFrame):
         # 값 변경 감지
         self.tree.bind("<<TreeviewSelect>>", self.on_selection_change)
         
-        # 붙여넣기 기능 (Ctrl+V)
+        # 붙여넣기 기능 개선 (여러 방법 지원)
+        # Treeview에 바인딩
         self.tree.bind("<Control-v>", self.on_paste)
+        self.tree.bind("<Control-V>", self.on_paste)  # 대문자도 지원
+        self.tree.bind("<Shift-Insert>", self.on_paste)  # Shift+Insert도 지원
         self.tree.bind("<Button-1>", lambda e: self.tree.focus_set())
+        
+        # 패널 전체에도 바인딩 (포커스가 없어도 작동)
+        self.scrollable_frame.bind("<Control-v>", lambda e: self.on_paste(e))
+        self.scrollable_frame.bind("<Control-V>", lambda e: self.on_paste(e))
+        self.scrollable_frame.bind("<Shift-Insert>", lambda e: self.on_paste(e))
         
         # 초기 행 하나 추가
         self.add_row(skip_callback=True)
     
-    def on_paste(self, event):
-        """붙여넣기 이벤트 처리"""
+    def on_paste(self, event=None):
+        """붙여넣기 이벤트 처리 - 개선된 버전"""
         try:
-            # 클립보드에서 데이터 가져오기
-            clipboard_text = self.tree.clipboard_get()
+            # Treeview에 포커스 설정
+            self.tree.focus_set()
+            
+            # 클립보드에서 데이터 가져오기 (여러 방법 시도)
+            clipboard_text = None
+            
+            # 방법 1: Tkinter 클립보드
+            try:
+                clipboard_text = self.tree.clipboard_get()
+            except tk.TclError:
+                pass
+            
+            # 방법 2: 시스템 클립보드 (pyperclip 사용 시도)
+            if not clipboard_text:
+                try:
+                    import pyperclip
+                    clipboard_text = pyperclip.paste()
+                except ImportError:
+                    pass
+                except Exception:
+                    pass
+            
+            # 방법 3: 직접 클립보드 접근 (Windows/Mac/Linux)
+            if not clipboard_text:
+                try:
+                    root = self.tree.winfo_toplevel()
+                    clipboard_text = root.clipboard_get()
+                except tk.TclError:
+                    pass
             
             if clipboard_text:
-                # 줄 단위로 분리
-                lines = [line.strip() for line in clipboard_text.split('\n') if line.strip()]
+                # 다양한 줄바꿈 문자 처리 (\r\n, \n, \r)
+                clipboard_text = clipboard_text.replace('\r\n', '\n').replace('\r', '\n')
                 
-                if lines:
+                # 줄 단위로 분리
+                lines = clipboard_text.split('\n')
+                
+                # 빈 줄 제거 및 공백 처리
+                processed_lines = []
+                for line in lines:
+                    line = line.strip()
+                    # 탭 문자를 공백으로 변환 (선택사항)
+                    line = line.replace('\t', ' ')
+                    if line:  # 빈 줄이 아닌 경우만 추가
+                        processed_lines.append(line)
+                
+                if processed_lines:
                     # 선택된 행이 있으면 그 위치부터, 없으면 마지막에 추가
                     selected = self.tree.selection()
                     if selected:
                         # 선택된 행 다음에 추가
                         insert_after = selected[0]
-                        for line in lines:
-                            self.tree.insert(insert_after, "end", values=(line,))
-                            insert_after = self.tree.get_children()[-1]
+                        for line in processed_lines:
+                            new_item = self.tree.insert(insert_after, "end", values=(line,))
+                            insert_after = new_item
                     else:
                         # 마지막에 추가
-                        for line in lines:
+                        for line in processed_lines:
                             self.add_row(line, skip_callback=True)
                     
                     self.update_count()
                     if self.on_data_change:
                         self.on_data_change()
+                    
+                    # 성공 메시지 (선택사항)
+                    # print(f"{len(processed_lines)}개 항목이 추가되었습니다.")
             
-            return "break"  # 기본 붙여넣기 동작 방지
-        except tk.TclError:
+            if event:
+                return "break"  # 기본 붙여넣기 동작 방지
+                
+        except tk.TclError as e:
             # 클립보드가 비어있거나 텍스트가 아닌 경우
-            pass
+            print(f"클립보드 접근 오류: {e}")
         except Exception as e:
             print(f"붙여넣기 오류: {e}")
+            import traceback
+            traceback.print_exc()
     
     def on_value_changed(self):
         """값 변경 이벤트"""
