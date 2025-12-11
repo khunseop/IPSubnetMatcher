@@ -30,9 +30,9 @@ class MainWindow:
         """윈도우 설정 및 커스터마이징"""
         # 기본 타이틀 바 유지 (크기 조절 및 최소화 기능을 위해)
         
-        # 윈도우 크기 (컴팩트)
-        self.root.geometry("1000x650")
-        self.root.minsize(850, 500)
+        # 윈도우 크기 (최대 컴팩트)
+        self.root.geometry("900x600")
+        self.root.minsize(750, 450)
         
         # 창 크기 조절 가능하게 설정
         self.root.resizable(True, True)
@@ -71,9 +71,9 @@ class MainWindow:
         )
         main_container.pack(fill="both", expand=True, padx=0, pady=0)
         
-        # 내부 컨테이너 (컴팩트)
+        # 내부 컨테이너 (최대 컴팩트)
         inner_container = ctk.CTkFrame(main_container, fg_color="transparent")
-        inner_container.pack(fill="both", expand=True, padx=8, pady=8)
+        inner_container.pack(fill="both", expand=True, padx=6, pady=6)
         
         # 컨트롤 버튼 영역 (컴팩트)
         control_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
@@ -87,7 +87,7 @@ class MainWindow:
             button_group,
             text="분석",
             command=self.start_analysis,
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=12, weight="bold"),
             height=28,
             width=70,
             corner_radius=6
@@ -99,7 +99,7 @@ class MainWindow:
             button_group,
             text="저장",
             command=self.export_to_excel,
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=12),
             height=28,
             width=70,
             corner_radius=6,
@@ -111,7 +111,7 @@ class MainWindow:
             button_group,
             text="초기화",
             command=self.reset_all,
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=12),
             height=28,
             width=60,
             corner_radius=6
@@ -130,7 +130,7 @@ class MainWindow:
             on_data_change=self.on_data_change
         )
         self.source_panel.pack(side="left", fill="both", expand=False, padx=(0, 4))
-        self.source_panel.configure(width=280)
+        self.source_panel.configure(width=260)
         
         # 중앙: Reference 패널 (컴팩트)
         self.reference_panel = InputPanel(
@@ -140,7 +140,7 @@ class MainWindow:
             on_data_change=self.on_data_change
         )
         self.reference_panel.pack(side="left", fill="both", expand=False, padx=(0, 4))
-        self.reference_panel.configure(width=280)
+        self.reference_panel.configure(width=260)
         
         # 우측: 결과 패널
         self.result_grid = ResultGrid(columns_frame)
@@ -154,7 +154,7 @@ class MainWindow:
         self.loading_label = ctk.CTkLabel(
             status_frame,
             text="●",
-            font=ctk.CTkFont(size=9, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=("#2563eb", "#2563eb")
         )
         self.loading_label.pack(side="left", padx=(0, 6))
@@ -163,7 +163,7 @@ class MainWindow:
         self.progress_label = ctk.CTkLabel(
             status_frame,
             text="준비됨",
-            font=ctk.CTkFont(size=10),
+            font=ctk.CTkFont(size=11),
             text_color=("#6b7280", "#6b7280")
         )
         self.progress_label.pack(side="left")
