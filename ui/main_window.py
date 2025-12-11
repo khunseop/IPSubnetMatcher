@@ -75,13 +75,13 @@ class MainWindow:
         )
         main_container.pack(fill="both", expand=True, padx=0, pady=0)
         
-        # 내부 컨테이너
+        # 내부 컨테이너 (컴팩트)
         inner_container = ctk.CTkFrame(main_container, fg_color="transparent")
-        inner_container.pack(fill="both", expand=True, padx=12, pady=12)
+        inner_container.pack(fill="both", expand=True, padx=8, pady=8)
         
-        # 컨트롤 버튼 영역 (미니멀 디자인)
+        # 컨트롤 버튼 영역 (컴팩트)
         control_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
-        control_frame.pack(fill="x", pady=(0, 8))
+        control_frame.pack(fill="x", pady=(0, 6))
         
         # 버튼 그룹 (오른쪽 정렬)
         button_group = ctk.CTkFrame(control_frame, fg_color="transparent")
@@ -91,47 +91,53 @@ class MainWindow:
             button_group,
             text="분석",
             command=self.start_analysis,
-            font=ctk.CTkFont(size=12, weight="bold"),
-            height=32,
-            width=80,
-            corner_radius=4,
-            fg_color=("#333333", "#333333"),
-            hover_color=("#444444", "#444444"),
-            text_color=("#e0e0e0", "#e0e0e0")
+            font=ctk.CTkFont(size=11, weight="bold"),
+            height=30,
+            width=75,
+            corner_radius=5,
+            fg_color=("#2a2a2a", "#2a2a2a"),
+            hover_color=("#4a4a4a", "#4a4a4a"),
+            text_color=("#e0e0e0", "#e0e0e0"),
+            border_width=1,
+            border_color=("#505050", "#505050")
         )
         self._loading_active = False  # 로딩 상태 플래그
-        self.analyze_btn.pack(side="left", padx=(0, 4))
+        self.analyze_btn.pack(side="left", padx=(0, 3))
         
         self.export_btn = ctk.CTkButton(
             button_group,
             text="저장",
             command=self.export_to_excel,
-            font=ctk.CTkFont(size=12),
-            height=32,
-            width=80,
-            corner_radius=4,
-            fg_color=("#333333", "#333333"),
-            hover_color=("#444444", "#444444"),
+            font=ctk.CTkFont(size=11),
+            height=30,
+            width=75,
+            corner_radius=5,
+            fg_color=("#2a2a2a", "#2a2a2a"),
+            hover_color=("#4a4a4a", "#4a4a4a"),
             text_color=("#e0e0e0", "#e0e0e0"),
+            border_width=1,
+            border_color=("#505050", "#505050"),
             state="disabled"
         )
-        self.export_btn.pack(side="left", padx=(0, 4))
+        self.export_btn.pack(side="left", padx=(0, 3))
         
         self.reset_btn = ctk.CTkButton(
             button_group,
             text="초기화",
             command=self.reset_all,
-            font=ctk.CTkFont(size=12),
-            height=32,
-            width=70,
-            corner_radius=4,
-            fg_color=("#333333", "#333333"),
-            hover_color=("#444444", "#444444"),
-            text_color=("#e0e0e0", "#e0e0e0")
+            font=ctk.CTkFont(size=11),
+            height=30,
+            width=65,
+            corner_radius=5,
+            fg_color=("#2a2a2a", "#2a2a2a"),
+            hover_color=("#4a4a4a", "#4a4a4a"),
+            text_color=("#e0e0e0", "#e0e0e0"),
+            border_width=1,
+            border_color=("#505050", "#505050")
         )
         self.reset_btn.pack(side="left")
         
-        # 3열 레이아웃
+        # 3열 레이아웃 (컴팩트)
         columns_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
         columns_frame.pack(fill="both", expand=True)
         
@@ -142,7 +148,7 @@ class MainWindow:
             is_reference=False,
             on_data_change=self.on_data_change
         )
-        self.source_panel.pack(side="left", fill="both", expand=True, padx=(0, 4))
+        self.source_panel.pack(side="left", fill="both", expand=True, padx=(0, 3))
         
         # 중앙: Reference 패널
         self.reference_panel = InputPanel(
@@ -151,21 +157,21 @@ class MainWindow:
             is_reference=True,
             on_data_change=self.on_data_change
         )
-        self.reference_panel.pack(side="left", fill="both", expand=True, padx=(4, 4))
+        self.reference_panel.pack(side="left", fill="both", expand=True, padx=(3, 3))
         
         # 우측: 결과 패널
         self.result_grid = ResultGrid(columns_frame)
-        self.result_grid.pack(side="left", fill="both", expand=True, padx=(4, 0))
+        self.result_grid.pack(side="left", fill="both", expand=True, padx=(3, 0))
         
-        # 하단 상태 바
+        # 하단 상태 바 (컴팩트)
         status_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
-        status_frame.pack(fill="x", pady=(8, 0))
+        status_frame.pack(fill="x", pady=(6, 0))
         
-        # 로딩 인디케이터 (초기에는 숨김)
+        # 로딩 인디케이터 (초기에는 숨김, 애니메이션 강화)
         self.loading_label = ctk.CTkLabel(
             status_frame,
             text="●",
-            font=ctk.CTkFont(size=8),
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=("#4ade80", "#4ade80")
         )
         self.loading_label.pack(side="left", padx=(0, 6))
@@ -174,7 +180,7 @@ class MainWindow:
         self.progress_label = ctk.CTkLabel(
             status_frame,
             text="준비됨",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=10),
             text_color=("#888888", "#888888")
         )
         self.progress_label.pack(side="left")
@@ -198,29 +204,26 @@ class MainWindow:
         else:
             self.analyze_btn.configure(state="disabled")
     
-    def start_analysis(self):
-        """분석 시작"""
-        self.analyze_btn.configure(state="disabled", text="분석 중...")
-        self.progress_label.configure(text="분석 중...", text_color=("#888888", "#888888"))
-        
-        # 로딩 인디케이터 표시
-        self._loading_active = True
-        self.loading_label.pack(side="left", padx=(0, 6))
-        self._animate_loading()
-        
-        # 별도 스레드에서 실행 (UI 멈춤 방지)
-        thread = threading.Thread(target=self.perform_analysis)
-        thread.daemon = True
-        thread.start()
     
     def _animate_loading(self):
-        """로딩 애니메이션"""
+        """로딩 애니메이션 (강화)"""
         if self._loading_active:
-            # 간단한 깜빡임 효과
+            # 부드러운 펄스 애니메이션
             current_color = self.loading_label.cget("text_color")[0]
-            new_color = "#1a1a1a" if current_color == "#4ade80" else "#4ade80"
-            self.loading_label.configure(text_color=(new_color, new_color))
-            self.root.after(500, self._animate_loading)
+            if current_color == "#4ade80":
+                # 페이드 아웃
+                colors = ["#4ade80", "#3dd16f", "#2dc45e", "#1a1a1a"]
+            else:
+                # 페이드 인
+                colors = ["#1a1a1a", "#2dc45e", "#3dd16f", "#4ade80"]
+            
+            def animate_step(step=0):
+                if step < len(colors) and self._loading_active:
+                    self.loading_label.configure(text_color=(colors[step], colors[step]))
+                    self.root.after(150, lambda: animate_step(step + 1))
+            
+            animate_step()
+            self.root.after(600, self._animate_loading)
     
     def perform_analysis(self):
         """실제 분석 수행 (최적화)"""
@@ -320,7 +323,12 @@ class MainWindow:
         self.analyze_btn.configure(state="normal", text="분석")
     
     def export_to_excel(self):
-        """엑셀로 내보내기 (깔끔한 서식)"""
+        """엑셀로 내보내기 (깔끔한 서식, 애니메이션 효과)"""
+        # 버튼 클릭 애니메이션
+        original_color = self.export_btn.cget("fg_color")
+        self.export_btn.configure(fg_color=("#5a5a5a", "#5a5a5a"))
+        self.root.after(100, lambda: self.export_btn.configure(fg_color=original_color))
+        
         results = self.result_grid.get_results_data()
         if not results:
             return
@@ -405,7 +413,12 @@ class MainWindow:
                 )
     
     def reset_all(self):
-        """전체 초기화"""
+        """전체 초기화 (애니메이션 효과)"""
+        # 버튼 클릭 애니메이션
+        original_color = self.reset_btn.cget("fg_color")
+        self.reset_btn.configure(fg_color=("#5a5a5a", "#5a5a5a"))
+        self.root.after(100, lambda: self.reset_btn.configure(fg_color=original_color))
+        
         self.source_panel.clear_data()
         self.reference_panel.clear_data()
         self.result_grid.display_results([])
@@ -415,6 +428,26 @@ class MainWindow:
         self.reference_data = []
         self.reference_cache = None
         self._last_reference_text = ''
+    
+    def start_analysis(self):
+        """분석 시작 (애니메이션 효과)"""
+        # 버튼 클릭 애니메이션
+        original_color = self.analyze_btn.cget("fg_color")
+        self.analyze_btn.configure(fg_color=("#5a5a5a", "#5a5a5a"))
+        self.root.after(100, lambda: self.analyze_btn.configure(fg_color=original_color))
+        
+        self.analyze_btn.configure(state="disabled", text="분석 중...")
+        self.progress_label.configure(text="분석 중...", text_color=("#888888", "#888888"))
+        
+        # 로딩 인디케이터 표시
+        self._loading_active = True
+        self.loading_label.pack(side="left", padx=(0, 6))
+        self._animate_loading()
+        
+        # 별도 스레드에서 실행 (UI 멈춤 방지)
+        thread = threading.Thread(target=self.perform_analysis)
+        thread.daemon = True
+        thread.start()
     
     def on_close(self):
         """윈도우 닫기"""
