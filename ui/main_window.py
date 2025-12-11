@@ -6,7 +6,6 @@ from core.parser import IPParser
 from core.matcher import Matcher
 from ui.input_panel import InputPanel
 from ui.result_grid import ResultGrid
-from ui.title_bar import CustomTitleBar
 
 
 class MainWindow:
@@ -29,136 +28,25 @@ class MainWindow:
     
     def setup_window(self):
         """윈도우 설정 및 커스터마이징"""
-        # 기본 타이틀 바 제거 (커스텀 타이틀 바 사용)
-        self.root.overrideredirect(True)
+        # 기본 타이틀 바 유지 (크기 조절 및 최소화 기능을 위해)
         
-        # 윈도우 크기
-        self.root.geometry("1400x700")
-        self.root.minsize(1000, 500)
+        # 윈도우 크기 (컴팩트)
+        self.root.geometry("1000x650")
+        self.root.minsize(850, 500)
         
         # 창 크기 조절 가능하게 설정
         self.root.resizable(True, True)
-        
-        # 크기 조절 테두리 설정
-        self.resize_border_width = 4
-        self.setup_resize_borders()
         
         # 윈도우 상태 추적
         self.is_maximized = False
         self.normal_geometry = None
         
-        # 투명도 효과 제거 (성능 향상)
-        # self.root.attributes("-alpha", 0.97)
-        
         # 윈도우 중앙 배치
         self.center_window()
         
-        # 배경색 설정 (미니멀 다크 테마)
-        self.root.configure(bg="#1a1a1a")
+        # 배경색 설정 (미니멀)
+        self.root.configure(bg="#ffffff")
     
-    def setup_resize_borders(self):
-        """크기 조절 테두리 설정"""
-        # 테두리 프레임들 생성 (보이지 않지만 마우스 이벤트 감지용)
-        self.resize_frames = {}
-        self.resizing = False
-        
-        # 상하좌우 테두리
-        borders = [
-            ('n', 'top', 'sb_v_double_arrow', True, False),
-            ('s', 'bottom', 'sb_v_double_arrow', True, False),
-            ('e', 'right', 'sb_h_double_arrow', False, True),
-            ('w', 'left', 'sb_h_double_arrow', False, True),
-        ]
-        
-        for key, side, cursor, fill_x, fill_y in borders:
-            # width와 height는 None 대신 조건부로 전달하지 않음
-            frame_kwargs = {
-                'master': self.root,
-                'fg_color': "transparent",
-                'border_width': 0
-            }
-            if not fill_x:
-                frame_kwargs['width'] = self.resize_border_width
-            if not fill_y:
-                frame_kwargs['height'] = self.resize_border_width
-            
-            frame = ctk.CTkFrame(**frame_kwargs)
-            if fill_x:
-                frame.pack(side=side, fill='x', expand=False)
-            elif fill_y:
-                frame.pack(side=side, fill='y', expand=False)
-            else:
-                frame.pack(side=side, expand=False)
-            
-            frame.configure(cursor=cursor)
-            frame.bind("<Button-1>", lambda e, d=key: self.start_resize(e, d))
-            frame.bind("<B1-Motion>", lambda e, d=key: self.on_resize(e, d))
-            frame.bind("<ButtonRelease-1>", self.stop_resize)
-            self.resize_frames[key] = frame
-        
-        # 모서리 크기 조절 프레임 추가 (간단하게 구현)
-        # 모서리는 테두리 교차점에서 자동으로 감지되므로 별도 구현 생략
-        # 필요시 나중에 추가 가능
-    
-    def start_resize(self, event, direction):
-        """크기 조절 시작"""
-        self.resize_start_x = event.x_root
-        self.resize_start_y = event.y_root
-        self.resize_start_width = self.root.winfo_width()
-        self.resize_start_height = self.root.winfo_height()
-        self.resize_start_win_x = self.root.winfo_x()
-        self.resize_start_win_y = self.root.winfo_y()
-        self.resizing = True
-        self.resize_direction = direction
-    
-    def on_resize(self, event, direction):
-        """크기 조절 중"""
-        if not self.resizing:
-            return
-        
-        dx = event.x_root - self.resize_start_x
-        dy = event.y_root - self.resize_start_y
-        
-        new_width = self.resize_start_width
-        new_height = self.resize_start_height
-        new_x = self.resize_start_win_x
-        new_y = self.resize_start_win_y
-        
-        min_width, min_height = self.root.minsize()
-        
-        # 모서리 크기 조절 (대각선)
-        if len(direction) == 2:
-            # 두 방향 모두 조절
-            if 'e' in direction:
-                new_width = max(min_width, self.resize_start_width + dx)
-            if 'w' in direction:
-                new_width = max(min_width, self.resize_start_width - dx)
-                new_x = self.resize_start_win_x + dx
-            
-            if 's' in direction:
-                new_height = max(min_height, self.resize_start_height + dy)
-            if 'n' in direction:
-                new_height = max(min_height, self.resize_start_height - dy)
-                new_y = self.resize_start_win_y + dy
-        else:
-            # 단일 방향 조절
-            if 'e' in direction:
-                new_width = max(min_width, self.resize_start_width + dx)
-            if 'w' in direction:
-                new_width = max(min_width, self.resize_start_width - dx)
-                new_x = self.resize_start_win_x + dx
-            
-            if 's' in direction:
-                new_height = max(min_height, self.resize_start_height + dy)
-            if 'n' in direction:
-                new_height = max(min_height, self.resize_start_height - dy)
-                new_y = self.resize_start_win_y + dy
-        
-        self.root.geometry(f"{new_width}x{new_height}+{new_x}+{new_y}")
-    
-    def stop_resize(self, event):
-        """크기 조절 종료"""
-        self.resizing = False
     
     def center_window(self):
         """윈도우를 화면 중앙에 배치"""
@@ -171,23 +59,13 @@ class MainWindow:
     
     def setup_ui(self):
         """UI 구성 - 3열 레이아웃"""
-        # 커스텀 타이틀 바 (경계 없이)
-        self.title_bar = CustomTitleBar(
-            self.root,
-            self.root,
-            on_close=self.on_close
-        )
-        self.title_bar.pack(fill="x", side="top", padx=0, pady=0)
+        # 커스텀 타이틀 바는 기본 타이틀 바를 사용하므로 제거
+        # macOS에서는 기본 타이틀 바가 더 잘 작동함
         
-        # 타이틀 바의 최대화 상태와 동기화
-        self.title_bar.is_maximized = self.is_maximized
-        if hasattr(self, 'normal_geometry'):
-            self.title_bar.normal_geometry = self.normal_geometry
-        
-        # 메인 컨테이너 (미니멀 다크 테마)
+        # 메인 컨테이너 (미니멀)
         main_container = ctk.CTkFrame(
             self.root,
-            fg_color=("#1a1a1a", "#1a1a1a"),
+            fg_color=("#ffffff", "#ffffff"),
             corner_radius=0,
             border_width=0
         )
@@ -210,48 +88,33 @@ class MainWindow:
             text="분석",
             command=self.start_analysis,
             font=ctk.CTkFont(size=11, weight="bold"),
-            height=30,
-            width=75,
-            corner_radius=5,
-            fg_color=("#2a2a2a", "#2a2a2a"),
-            hover_color=("#4a4a4a", "#4a4a4a"),
-            text_color=("#e0e0e0", "#e0e0e0"),
-            border_width=1,
-            border_color=("#505050", "#505050")
+            height=28,
+            width=70,
+            corner_radius=6
         )
-        self._loading_active = False  # 로딩 상태 플래그
-        self.analyze_btn.pack(side="left", padx=(0, 3))
+        self._loading_active = False
+        self.analyze_btn.pack(side="left", padx=(0, 4))
         
         self.export_btn = ctk.CTkButton(
             button_group,
             text="저장",
             command=self.export_to_excel,
             font=ctk.CTkFont(size=11),
-            height=30,
-            width=75,
-            corner_radius=5,
-            fg_color=("#2a2a2a", "#2a2a2a"),
-            hover_color=("#4a4a4a", "#4a4a4a"),
-            text_color=("#e0e0e0", "#e0e0e0"),
-            border_width=1,
-            border_color=("#505050", "#505050"),
+            height=28,
+            width=70,
+            corner_radius=6,
             state="disabled"
         )
-        self.export_btn.pack(side="left", padx=(0, 3))
+        self.export_btn.pack(side="left", padx=(0, 4))
         
         self.reset_btn = ctk.CTkButton(
             button_group,
             text="초기화",
             command=self.reset_all,
             font=ctk.CTkFont(size=11),
-            height=30,
-            width=65,
-            corner_radius=5,
-            fg_color=("#2a2a2a", "#2a2a2a"),
-            hover_color=("#4a4a4a", "#4a4a4a"),
-            text_color=("#e0e0e0", "#e0e0e0"),
-            border_width=1,
-            border_color=("#505050", "#505050")
+            height=28,
+            width=60,
+            corner_radius=6
         )
         self.reset_btn.pack(side="left")
         
@@ -259,49 +122,49 @@ class MainWindow:
         columns_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
         columns_frame.pack(fill="both", expand=True)
         
-        # 좌측: Source 패널 (너비 제한)
+        # 좌측: Source 패널 (컴팩트)
         self.source_panel = InputPanel(
             columns_frame,
             "Source",
             is_reference=False,
             on_data_change=self.on_data_change
         )
-        self.source_panel.pack(side="left", fill="both", expand=False, padx=(0, 3))
-        self.source_panel.configure(width=280)  # 고정 너비
+        self.source_panel.pack(side="left", fill="both", expand=False, padx=(0, 4))
+        self.source_panel.configure(width=280)
         
-        # 중앙: Reference 패널 (너비 제한)
+        # 중앙: Reference 패널 (컴팩트)
         self.reference_panel = InputPanel(
             columns_frame,
             "Reference",
             is_reference=True,
             on_data_change=self.on_data_change
         )
-        self.reference_panel.pack(side="left", fill="both", expand=False, padx=(3, 3))
-        self.reference_panel.configure(width=280)  # 고정 너비
+        self.reference_panel.pack(side="left", fill="both", expand=False, padx=(0, 4))
+        self.reference_panel.configure(width=280)
         
-        # 우측: 결과 패널 (넓게)
+        # 우측: 결과 패널
         self.result_grid = ResultGrid(columns_frame)
-        self.result_grid.pack(side="left", fill="both", expand=True, padx=(3, 0))
+        self.result_grid.pack(side="left", fill="both", expand=True, padx=(0, 0))
         
-        # 하단 상태 바 (컴팩트)
+        # 하단 상태 바 (미니멀)
         status_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
         status_frame.pack(fill="x", pady=(6, 0))
         
-        # 로딩 인디케이터 (초기에는 숨김, 애니메이션 강화)
+        # 로딩 인디케이터 (초기에는 숨김)
         self.loading_label = ctk.CTkLabel(
             status_frame,
             text="●",
-            font=ctk.CTkFont(size=10, weight="bold"),
-            text_color=("#4ade80", "#4ade80")
+            font=ctk.CTkFont(size=9, weight="bold"),
+            text_color=("#2563eb", "#2563eb")
         )
         self.loading_label.pack(side="left", padx=(0, 6))
-        self.loading_label.pack_forget()  # 초기에는 숨김
+        self.loading_label.pack_forget()
         
         self.progress_label = ctk.CTkLabel(
             status_frame,
             text="준비됨",
             font=ctk.CTkFont(size=10),
-            text_color=("#888888", "#888888")
+            text_color=("#6b7280", "#6b7280")
         )
         self.progress_label.pack(side="left")
     
@@ -326,24 +189,16 @@ class MainWindow:
     
     
     def _animate_loading(self):
-        """로딩 애니메이션 (강화)"""
+        """로딩 애니메이션 (최적화)"""
         if self._loading_active:
-            # 부드러운 펄스 애니메이션
+            # 간단한 펄스 애니메이션 (성능 최적화)
             current_color = self.loading_label.cget("text_color")[0]
-            if current_color == "#4ade80":
-                # 페이드 아웃
-                colors = ["#4ade80", "#3dd16f", "#2dc45e", "#1a1a1a"]
+            if current_color == "#2563eb":
+                new_color = "#93c5fd"
             else:
-                # 페이드 인
-                colors = ["#1a1a1a", "#2dc45e", "#3dd16f", "#4ade80"]
-            
-            def animate_step(step=0):
-                if step < len(colors) and self._loading_active:
-                    self.loading_label.configure(text_color=(colors[step], colors[step]))
-                    self.root.after(150, lambda: animate_step(step + 1))
-            
-            animate_step()
-            self.root.after(600, self._animate_loading)
+                new_color = "#2563eb"
+            self.loading_label.configure(text_color=(new_color, new_color))
+            self.root.after(500, self._animate_loading)
     
     def perform_analysis(self):
         """실제 분석 수행 (완전히 별도 스레드에서 실행, UI와 완전 분리)"""
@@ -351,11 +206,12 @@ class MainWindow:
             # Source 파싱 진행률 콜백 (스레드 안전)
             def source_progress(current, total):
                 percent = (current * 100) // total if total > 0 else 0
-                # after를 사용하여 메인 스레드에서만 UI 업데이트
-                self.root.after(0, lambda: self.progress_label.configure(
-                    text=f"Source 파싱 중... {current}/{total} ({percent}%)",
-                    text_color=("#888888", "#888888")
-                ))
+                # after를 사용하여 메인 스레드에서만 UI 업데이트 (최적화: 10% 단위로만 업데이트)
+                if current % max(1, total // 10) == 0 or current == total:
+                    self.root.after(0, lambda: self.progress_label.configure(
+                        text=f"Source 파싱 중... {current}/{total} ({percent}%)",
+                        text_color=("#6b7280", "#6b7280")
+                    ))
             
             # Source 데이터 파싱 (배치 처리)
             source_text = self.source_panel.get_text_content()
@@ -364,11 +220,12 @@ class MainWindow:
             # Reference 파싱 진행률 콜백 (스레드 안전)
             def ref_progress(current, total):
                 percent = (current * 100) // total if total > 0 else 0
-                # after를 사용하여 메인 스레드에서만 UI 업데이트
-                self.root.after(0, lambda: self.progress_label.configure(
-                    text=f"Reference 파싱 중... {current}/{total} ({percent}%)",
-                    text_color=("#888888", "#888888")
-                ))
+                # after를 사용하여 메인 스레드에서만 UI 업데이트 (최적화: 10% 단위로만 업데이트)
+                if current % max(1, total // 10) == 0 or current == total:
+                    self.root.after(0, lambda: self.progress_label.configure(
+                        text=f"Reference 파싱 중... {current}/{total} ({percent}%)",
+                        text_color=("#6b7280", "#6b7280")
+                    ))
             
             # Reference 데이터 파싱 (캐시 사용, 배치 처리)
             reference_text = self.reference_panel.get_text_content()
@@ -393,18 +250,21 @@ class MainWindow:
             # 진행 상황 업데이트
             self.root.after(0, lambda: self.progress_label.configure(
                 text=f"매칭 중... (Source: {len(self.source_data)}, Reference: {len(self.reference_data)})",
-                text_color=("#888888", "#888888")
+                text_color=("#6b7280", "#6b7280")
             ))
             
-            # 진행률 콜백 함수 정의 (스레드 안전)
+            # 진행률 콜백 함수 정의 (스레드 안전, 최적화)
+            _last_update = [0]  # 클로저를 위한 리스트
             def progress_callback(current, total):
-                """매칭 진행률 업데이트 (메인 스레드에서만 실행)"""
+                """매칭 진행률 업데이트 (메인 스레드에서만 실행, 최적화)"""
+                # 10% 단위로만 업데이트하여 성능 향상
                 percent = (current * 100) // total if total > 0 else 0
-                # after를 사용하여 메인 스레드에서만 UI 업데이트
-                self.root.after(0, lambda: self.progress_label.configure(
-                    text=f"매칭 중... {current}/{total} ({percent}%)",
-                    text_color=("#888888", "#888888")
-                ))
+                if current % max(1, total // 10) == 0 or current == total or current - _last_update[0] >= max(1, total // 20):
+                    _last_update[0] = current
+                    self.root.after(0, lambda: self.progress_label.configure(
+                        text=f"매칭 중... {current}/{total} ({percent}%)",
+                        text_color=("#6b7280", "#6b7280")
+                    ))
             
             # 매칭 수행 (초고성능 최적화 버전)
             results = Matcher.match(self.source_data, self.reference_data, progress_callback)
@@ -428,7 +288,7 @@ class MainWindow:
         total_count = len(results)
         self.progress_label.configure(
             text=f"완료: {matched_count}/{total_count}",
-            text_color=("#888888", "#888888")
+            text_color=("#059669", "#059669")
         )
         self.analyze_btn.configure(state="normal", text="분석")
         self.export_btn.configure(state="normal")
@@ -441,16 +301,12 @@ class MainWindow:
         
         self.progress_label.configure(
             text=f"오류: {error_msg[:50]}",
-            text_color=("#f87171", "#f87171")
+            text_color=("#dc2626", "#dc2626")
         )
         self.analyze_btn.configure(state="normal", text="분석")
     
     def export_to_excel(self):
-        """엑셀로 내보내기 (깔끔한 서식, 애니메이션 효과)"""
-        # 버튼 클릭 애니메이션
-        original_color = self.export_btn.cget("fg_color")
-        self.export_btn.configure(fg_color=("#5a5a5a", "#5a5a5a"))
-        self.root.after(100, lambda: self.export_btn.configure(fg_color=original_color))
+        """엑셀로 내보내기 (깔끔한 서식)"""
         
         results = self.result_grid.get_results_data()
         if not results:
@@ -525,27 +381,23 @@ class MainWindow:
                 file_name = file_path.split('/')[-1]
                 self.progress_label.configure(
                     text=f"저장됨: {file_name}",
-                    text_color=("#888888", "#888888")
+                    text_color=("#059669", "#059669")
                 )
             except Exception as e:
                 error_msg = f"저장 오류: {str(e)}"
                 print(error_msg)
                 self.progress_label.configure(
                     text=f"오류: {error_msg[:50]}",
-                    text_color=("#f87171", "#f87171")
+                    text_color=("#dc2626", "#dc2626")
                 )
     
     def reset_all(self):
-        """전체 초기화 (애니메이션 효과)"""
-        # 버튼 클릭 애니메이션
-        original_color = self.reset_btn.cget("fg_color")
-        self.reset_btn.configure(fg_color=("#5a5a5a", "#5a5a5a"))
-        self.root.after(100, lambda: self.reset_btn.configure(fg_color=original_color))
+        """전체 초기화"""
         
         self.source_panel.clear_data()
         self.reference_panel.clear_data()
         self.result_grid.display_results([])
-        self.progress_label.configure(text="준비됨", text_color=("#888888", "#888888"))
+        self.progress_label.configure(text="준비됨", text_color=("#6b7280", "#6b7280"))
         self.export_btn.configure(state="disabled")
         self.source_data = []
         self.reference_data = []
@@ -553,14 +405,9 @@ class MainWindow:
         self._last_reference_text = ''
     
     def start_analysis(self):
-        """분석 시작 (애니메이션 효과)"""
-        # 버튼 클릭 애니메이션
-        original_color = self.analyze_btn.cget("fg_color")
-        self.analyze_btn.configure(fg_color=("#5a5a5a", "#5a5a5a"))
-        self.root.after(100, lambda: self.analyze_btn.configure(fg_color=original_color))
-        
+        """분석 시작"""
         self.analyze_btn.configure(state="disabled", text="분석 중...")
-        self.progress_label.configure(text="분석 중...", text_color=("#888888", "#888888"))
+        self.progress_label.configure(text="분석 중...", text_color=("#6b7280", "#6b7280"))
         
         # 로딩 인디케이터 표시
         self._loading_active = True
@@ -574,7 +421,8 @@ class MainWindow:
     
     def on_close(self):
         """윈도우 닫기"""
-        self.root.destroy()
+        # 기본 타이틀 바를 사용하므로 별도 처리 불필요
+        pass
     
     def run(self):
         """애플리케이션 실행"""

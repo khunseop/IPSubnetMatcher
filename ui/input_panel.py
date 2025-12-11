@@ -15,79 +15,82 @@ class InputPanel(ctk.CTkFrame):
             is_reference: Reference 패널 여부
             on_data_change: 데이터 변경 시 호출할 콜백 함수
         """
-        super().__init__(parent, corner_radius=6, border_width=0, fg_color=("#1a1a1a", "#1a1a1a"))
+        super().__init__(
+            parent, 
+            corner_radius=6, 
+            border_width=1, 
+            border_color=("#e5e7eb", "#e5e7eb"),
+            fg_color=("#ffffff", "#ffffff")
+        )
         self.is_reference = is_reference
         self.on_data_change = on_data_change
         self._update_job = None  # debounce용
         
         # 헤더 영역 (컴팩트)
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        header_frame.pack(fill="x", padx=6, pady=(6, 3))
+        header_frame.pack(fill="x", padx=8, pady=(8, 4))
         
         # 제목 레이블
         self.title_label = ctk.CTkLabel(
             header_frame,
             text=title,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=13, weight="bold"),
             anchor="w",
-            text_color=("#e0e0e0", "#e0e0e0")
+            text_color=("#111827", "#111827")
         )
         self.title_label.pack(side="left")
         
-        # 초기화 버튼 (개수 앞으로 이동)
+        # 초기화 버튼 (컴팩트)
         self.clear_btn = ctk.CTkButton(
             header_frame,
             text="초기화",
             command=self.clear_data,
-            font=ctk.CTkFont(size=11),
-            height=26,
-            width=60,
+            font=ctk.CTkFont(size=10),
+            height=22,
+            width=50,
             corner_radius=4,
-            fg_color=("#2a2a2a", "#2a2a2a"),
-            hover_color=("#3a3a3a", "#3a3a3a"),
-            text_color=("#e0e0e0", "#e0e0e0"),
-            border_width=1,
-            border_color=("#404040", "#404040")
+            fg_color="transparent",
+            hover_color=("#f3f4f6", "#f3f4f6"),
+            text_color=("#6b7280", "#6b7280"),
+            border_width=0
         )
-        self.clear_btn.pack(side="right", padx=(4, 0))
+        self.clear_btn.pack(side="right")
         
-        # 개수 표시 레이블 (초기화 버튼 뒤로 이동)
+        # 개수 표시 레이블 (미니멀)
         self.count_label = ctk.CTkLabel(
             header_frame,
             text="0개",
-            font=ctk.CTkFont(size=12),
-            text_color=("#888888", "#888888"),
+            font=ctk.CTkFont(size=10),
+            text_color=("#6b7280", "#6b7280"),
             anchor="e"
         )
-        self.count_label.pack(side="right", padx=(0, 4))
+        self.count_label.pack(side="right", padx=(0, 6))
         
-        # 텍스트 입력 영역 (완전 다크 테마, 큰 글씨)
-        # Windows에서 잘 보이는 폰트: Consolas, Courier New, 'Courier New'
-        font_family = "Consolas"  # Windows에서 멋진 모노스페이스 폰트
+        # 텍스트 입력 영역 (미니멀)
+        font_family = "Consolas"
         try:
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=14, family=font_family),
-                fg_color=("#1a1a1a", "#1a1a1a"),
-                text_color=("#d0d0d0", "#d0d0d0"),
-                border_color=("#333333", "#333333"),
+                font=ctk.CTkFont(size=11, family=font_family),
+                fg_color=("#ffffff", "#ffffff"),
+                text_color=("#111827", "#111827"),
+                border_color=("#e5e7eb", "#e5e7eb"),
                 border_width=1,
                 corner_radius=4,
                 wrap="none"
             )
         except:
-            # 폰트가 없을 경우 기본 폰트 사용
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=14),
-                fg_color=("#1a1a1a", "#1a1a1a"),
-                text_color=("#d0d0d0", "#d0d0d0"),
-                border_color=("#333333", "#333333"),
+                font=ctk.CTkFont(size=11),
+                fg_color=("#ffffff", "#ffffff"),
+                text_color=("#111827", "#111827"),
+                border_color=("#e5e7eb", "#e5e7eb"),
                 border_width=1,
                 corner_radius=4,
                 wrap="none"
             )
-        self.textbox.pack(fill="both", expand=True, padx=6, pady=(0, 6))
+        self.textbox.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         
         # 텍스트 변경 감지 (debounce 적용)
         self.textbox.bind("<KeyRelease>", self.on_text_change)
@@ -129,9 +132,9 @@ class InputPanel(ctk.CTkFrame):
         new_text = f"{count}개"
         
         if current_text != new_text:
-            # 색상 변경 애니메이션
-            self.count_label.configure(text=new_text, text_color=("#4ade80", "#4ade80"))
-            self.after(200, lambda: self.count_label.configure(text_color=("#888888", "#888888")))
+            # 간단한 색상 변경
+            self.count_label.configure(text=new_text, text_color=("#2563eb", "#2563eb"))
+            self.after(200, lambda: self.count_label.configure(text_color=("#6b7280", "#6b7280")))
         else:
             self.count_label.configure(text=new_text)
     
