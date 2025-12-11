@@ -264,8 +264,18 @@ class MainWindow:
                 text_color=("#888888", "#888888")
             ))
             
-            # 매칭 수행 (최적화된 버전)
-            results = Matcher.match_optimized(self.source_data, self.reference_data)
+            # 진행률 콜백 함수 정의
+            def progress_callback(current, total):
+                """매칭 진행률 업데이트 (UI 스레드에서 실행)"""
+                percent = (current * 100) // total if total > 0 else 0
+                # UI 업데이트는 메인 스레드에서만
+                self.root.after_idle(lambda: self.progress_label.configure(
+                    text=f"매칭 중... {current}/{total} ({percent}%)",
+                    text_color=("#888888", "#888888")
+                ))
+            
+            # 매칭 수행 (초고성능 최적화 버전)
+            results = Matcher.match(self.source_data, self.reference_data, progress_callback)
             
             # UI 업데이트 (메인 스레드에서 실행)
             self.root.after(0, self.update_results, results)
