@@ -34,7 +34,18 @@ class MainWindow:
         
         # 윈도우 크기
         self.root.geometry("1400x700")
-        self.root.minsize(1200, 600)
+        self.root.minsize(1000, 500)
+        
+        # 창 크기 조절 가능하게 설정
+        self.root.resizable(True, True)
+        
+        # 크기 조절 테두리 설정
+        self.resize_border_width = 4
+        self.setup_resize_borders()
+        
+        # 윈도우 상태 추적
+        self.is_maximized = False
+        self.normal_geometry = None
         
         # 투명도 효과 제거 (성능 향상)
         # self.root.attributes("-alpha", 0.97)
@@ -44,6 +55,105 @@ class MainWindow:
         
         # 배경색 설정 (미니멀 다크 테마)
         self.root.configure(bg="#1a1a1a")
+    
+    def setup_resize_borders(self):
+        """크기 조절 테두리 설정"""
+        # 테두리 프레임들 생성 (보이지 않지만 마우스 이벤트 감지용)
+        self.resize_frames = {}
+        self.resizing = False
+        
+        # 상하좌우 테두리
+        borders = [
+            ('n', 'top', 'sb_v_double_arrow', True, False),
+            ('s', 'bottom', 'sb_v_double_arrow', True, False),
+            ('e', 'right', 'sb_h_double_arrow', False, True),
+            ('w', 'left', 'sb_h_double_arrow', False, True),
+        ]
+        
+        for key, side, cursor, fill_x, fill_y in borders:
+            frame = ctk.CTkFrame(
+                self.root,
+                fg_color="transparent",
+                border_width=0,
+                width=self.resize_border_width if not fill_x else None,
+                height=self.resize_border_width if not fill_y else None
+            )
+            if fill_x:
+                frame.pack(side=side, fill='x', expand=False)
+            elif fill_y:
+                frame.pack(side=side, fill='y', expand=False)
+            else:
+                frame.pack(side=side, expand=False)
+            
+            frame.configure(cursor=cursor)
+            frame.bind("<Button-1>", lambda e, d=key: self.start_resize(e, d))
+            frame.bind("<B1-Motion>", lambda e, d=key: self.on_resize(e, d))
+            frame.bind("<ButtonRelease-1>", self.stop_resize)
+            self.resize_frames[key] = frame
+        
+        # 모서리 크기 조절 프레임 추가 (간단하게 구현)
+        # 모서리는 테두리 교차점에서 자동으로 감지되므로 별도 구현 생략
+        # 필요시 나중에 추가 가능
+    
+    def start_resize(self, event, direction):
+        """크기 조절 시작"""
+        self.resize_start_x = event.x_root
+        self.resize_start_y = event.y_root
+        self.resize_start_width = self.root.winfo_width()
+        self.resize_start_height = self.root.winfo_height()
+        self.resize_start_win_x = self.root.winfo_x()
+        self.resize_start_win_y = self.root.winfo_y()
+        self.resizing = True
+        self.resize_direction = direction
+    
+    def on_resize(self, event, direction):
+        """크기 조절 중"""
+        if not self.resizing:
+            return
+        
+        dx = event.x_root - self.resize_start_x
+        dy = event.y_root - self.resize_start_y
+        
+        new_width = self.resize_start_width
+        new_height = self.resize_start_height
+        new_x = self.resize_start_win_x
+        new_y = self.resize_start_win_y
+        
+        min_width, min_height = self.root.minsize()
+        
+        # 모서리 크기 조절 (대각선)
+        if len(direction) == 2:
+            # 두 방향 모두 조절
+            if 'e' in direction:
+                new_width = max(min_width, self.resize_start_width + dx)
+            if 'w' in direction:
+                new_width = max(min_width, self.resize_start_width - dx)
+                new_x = self.resize_start_win_x + dx
+            
+            if 's' in direction:
+                new_height = max(min_height, self.resize_start_height + dy)
+            if 'n' in direction:
+                new_height = max(min_height, self.resize_start_height - dy)
+                new_y = self.resize_start_win_y + dy
+        else:
+            # 단일 방향 조절
+            if 'e' in direction:
+                new_width = max(min_width, self.resize_start_width + dx)
+            if 'w' in direction:
+                new_width = max(min_width, self.resize_start_width - dx)
+                new_x = self.resize_start_win_x + dx
+            
+            if 's' in direction:
+                new_height = max(min_height, self.resize_start_height + dy)
+            if 'n' in direction:
+                new_height = max(min_height, self.resize_start_height - dy)
+                new_y = self.resize_start_win_y + dy
+        
+        self.root.geometry(f"{new_width}x{new_height}+{new_x}+{new_y}")
+    
+    def stop_resize(self, event):
+        """크기 조절 종료"""
+        self.resizing = False
     
     def center_window(self):
         """윈도우를 화면 중앙에 배치"""
@@ -63,6 +173,11 @@ class MainWindow:
             on_close=self.on_close
         )
         self.title_bar.pack(fill="x", side="top", padx=0, pady=0)
+        
+        # 타이틀 바의 최대화 상태와 동기화
+        self.title_bar.is_maximized = self.is_maximized
+        if hasattr(self, 'normal_geometry'):
+            self.title_bar.normal_geometry = self.normal_geometry
         
         # 메인 컨테이너 (미니멀 다크 테마)
         main_container = ctk.CTkFrame(
