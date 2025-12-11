@@ -66,8 +66,12 @@ class Matcher:
                 addr_int = int(ref_parsed)
                 address_set[addr_int] = ref_original
                 
+            elif isinstance(ref_parsed, tuple):
+                # Range: (start_int, end_int) 튜플
+                start_int, end_int = ref_parsed
+                range_list.append((start_int, end_int, ref_original))
             elif isinstance(ref_parsed, set):
-                # Range: 시작/끝 정수로 변환
+                # Set 타입 (하위 호환성)
                 if ref_parsed:
                     sorted_ips = sorted(ref_parsed)
                     start_int = int(sorted_ips[0])
@@ -131,8 +135,29 @@ class Matcher:
                        (end_int & source_mask) == source_network_int:
                         matched_ips.append(ref_original)
                         
+            elif isinstance(source_parsed, tuple):
+                # Range vs Network/Address/Range 매칭
+                source_start, source_end = source_parsed
+                
+                # Network 매칭 (Range의 시작/끝이 Network에 포함되는지)
+                for prefix_len in network_groups.keys():
+                    for network_int, network_mask, ref_original in network_groups[prefix_len]:
+                        if ((source_start & network_mask) == network_int) or \
+                           ((source_end & network_mask) == network_int):
+                            matched_ips.append(ref_original)
+                
+                # Address 매칭
+                for addr_int, ref_original in address_set.items():
+                    if source_start <= addr_int <= source_end:
+                        matched_ips.append(ref_original)
+                
+                # Range 매칭 (범위 겹침 확인)
+                for start_int, end_int, ref_original in range_list:
+                    if not (source_end < start_int or source_start > end_int):
+                        matched_ips.append(ref_original)
+                        
             elif isinstance(source_parsed, set):
-                # Set vs Network/Address/Range 매칭
+                # Set vs Network/Address/Range 매칭 (하위 호환성)
                 source_ips = sorted(source_parsed)
                 
                 # Network 매칭

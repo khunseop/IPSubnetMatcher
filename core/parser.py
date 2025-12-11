@@ -1,34 +1,62 @@
-"""IP 포맷 파싱 모듈"""
-from typing import List, Optional, Union
+"""IP 포맷 파싱 모듈 - 고성능 배치 처리"""
+from typing import List, Optional, Union, Callable, Iterator
 import ipaddress
 import re
 from utils.ip_utils import parse_ip_input
 
 
 class IPParser:
-    """IP 입력 파싱 클래스"""
+    """IP 입력 파싱 클래스 - 배치 처리 및 비동기 지원"""
+    
+    # 배치 크기 (한 번에 처리할 항목 수)
+    BATCH_SIZE = 1000
     
     @staticmethod
-    def parse_text_input(text: str) -> List[dict]:
+    def parse_text_input(text: str, progress_callback: Optional[Callable[[int, int], None]] = None) -> List[dict]:
         """
-        텍스트 입력을 파싱하여 IP 리스트 반환 (콤마/개행 지원)
+        텍스트 입력을 파싱하여 IP 리스트 반환 (콤마/개행 지원, 배치 처리)
         
         Args:
             text: 입력 텍스트 (개행 또는 콤마로 구분)
+            progress_callback: 진행률 콜백 함수 (current, total)
             
         Returns:
             [{'original': str, 'parsed': IPv4Address|IPv4Network|Set, 'type': str}, ...]
         """
-        # 콤마와 개행 모두로 분리
-        items = re.split(r'[,\n]+', text.strip())
+        # 빠른 분리 (정규식 최적화)
+        items = re.split(r'[,\n\r]+', text.strip())
+        # 빈 항목 제거 및 공백 제거 (리스트 컴프리헨션으로 빠르게)
+        items = [item.strip() for item in items if item.strip()]
+        
+        total = len(items)
+        if total == 0:
+            return []
+        
+        results = []
+        
+        # 배치로 처리하여 UI 업데이트 가능
+        for batch_start in range(0, total, IPParser.BATCH_SIZE):
+            batch_end = min(batch_start + IPParser.BATCH_SIZE, total)
+            batch_items = items[batch_start:batch_end]
+            
+            # 배치 파싱 (벌크 처리)
+            batch_results = IPParser._parse_batch(batch_items)
+            results.extend(batch_results)
+            
+            # 진행률 업데이트
+            if progress_callback:
+                progress_callback(batch_end, total)
+        
+        return results
+    
+    @staticmethod
+    def _parse_batch(items: List[str]) -> List[dict]:
+        """배치 단위로 빠르게 파싱"""
         results = []
         
         for item in items:
-            item = item.strip()
-            if not item:
-                continue
-            
-            parsed = parse_ip_input(item)
+            # 빠른 파싱 (최적화된 버전)
+            parsed = IPParser._fast_parse_ip(item)
             if parsed is None:
                 continue
             
@@ -37,7 +65,7 @@ class IPParser:
                 ip_type = 'Single'
             elif isinstance(parsed, ipaddress.IPv4Network):
                 ip_type = 'CIDR'
-            elif isinstance(parsed, set):
+            elif isinstance(parsed, tuple):  # Range는 (start, end) 튜플로 저장
                 ip_type = 'Range'
             else:
                 ip_type = 'Unknown'
@@ -49,6 +77,49 @@ class IPParser:
             })
         
         return results
+    
+    @staticmethod
+    def _fast_parse_ip(ip_str: str) -> Optional[Union[ipaddress.IPv4Address, ipaddress.IPv4Network, tuple]]:
+        """
+        빠른 IP 파싱 (Range는 Set 대신 튜플로 저장하여 메모리 절약)
+        
+        Args:
+            ip_str: IP 문자열
+            
+        Returns:
+            IPv4Address, IPv4Network, 또는 (start_int, end_int) 튜플
+        """
+        ip_str = ip_str.strip()
+        if not ip_str:
+            return None
+        
+        # CIDR 포맷 확인 (가장 빠름)
+        if '/' in ip_str:
+            try:
+                return ipaddress.IPv4Network(ip_str, strict=False)
+            except ValueError:
+                return None
+        
+        # Range 포맷 확인
+        if '-' in ip_str and ip_str.count('-') == 1:
+            try:
+                parts = ip_str.split('-')
+                start_ip = ipaddress.IPv4Address(parts[0].strip())
+                end_ip = ipaddress.IPv4Address(parts[1].strip())
+                
+                if start_ip > end_ip:
+                    return None
+                
+                # Set 대신 튜플로 저장 (메모리 절약, 빠른 비교)
+                return (int(start_ip), int(end_ip))
+            except (ValueError, AttributeError):
+                return None
+        
+        # Single IP
+        try:
+            return ipaddress.IPv4Address(ip_str)
+        except ValueError:
+            return None
     
     @staticmethod
     def parse_file(file_path: str) -> List[dict]:
@@ -68,4 +139,3 @@ class IPParser:
         except Exception as e:
             print(f"파일 읽기 오류: {e}")
             return []
-

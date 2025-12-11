@@ -225,26 +225,32 @@ class MainWindow:
     def perform_analysis(self):
         """실제 분석 수행 (최적화)"""
         try:
-            # 진행 상황 업데이트
-            self.root.after(0, lambda: self.progress_label.configure(
-                text="Source 파싱 중...", text_color=("#888888", "#888888")
-            ))
+            # Source 파싱 진행률 콜백
+            def source_progress(current, total):
+                percent = (current * 100) // total if total > 0 else 0
+                self.root.after_idle(lambda: self.progress_label.configure(
+                    text=f"Source 파싱 중... {current}/{total} ({percent}%)",
+                    text_color=("#888888", "#888888")
+                ))
             
-            # Source 데이터 파싱
+            # Source 데이터 파싱 (배치 처리)
             source_text = self.source_panel.get_text_content()
-            self.source_data = IPParser.parse_text_input(source_text)
+            self.source_data = IPParser.parse_text_input(source_text, source_progress)
             
-            # 진행 상황 업데이트
-            self.root.after(0, lambda: self.progress_label.configure(
-                text="Reference 파싱 중...", text_color=("#888888", "#888888")
-            ))
+            # Reference 파싱 진행률 콜백
+            def ref_progress(current, total):
+                percent = (current * 100) // total if total > 0 else 0
+                self.root.after_idle(lambda: self.progress_label.configure(
+                    text=f"Reference 파싱 중... {current}/{total} ({percent}%)",
+                    text_color=("#888888", "#888888")
+                ))
             
-            # Reference 데이터 파싱 (캐시 사용)
+            # Reference 데이터 파싱 (캐시 사용, 배치 처리)
             reference_text = self.reference_panel.get_text_content()
             
             if self.reference_cache is None:
-                # 캐시가 없으면 파싱
-                parsed_refs = IPParser.parse_text_input(reference_text)
+                # 캐시가 없으면 파싱 (배치 처리)
+                parsed_refs = IPParser.parse_text_input(reference_text, ref_progress)
                 self.reference_data = []
                 for ref in parsed_refs:
                     self.reference_data.append({
