@@ -3,19 +3,32 @@
 
 block_cipher = None
 
+import os
+import sys
+
+# customtkinter assets 경로 찾기
+def find_customtkinter_assets():
+    try:
+        import customtkinter
+        ctk_path = os.path.dirname(customtkinter.__file__)
+        assets_path = os.path.join(ctk_path, 'assets')
+        if os.path.exists(assets_path):
+            return [(assets_path, 'customtkinter/assets')]
+    except:
+        pass
+    return []
+
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=find_customtkinter_assets(),  # customtkinter assets 포함
     hiddenimports=[
         'customtkinter',
-        'pandas',
         'openpyxl',
-        'ipaddress',
+        'openpyxl.styles',
         'tkinter',
         'tkinter.filedialog',
-        'tkinter.ttk',
         'threading',
     ],
     hookspath=[],

@@ -7,8 +7,6 @@ from core.matcher import Matcher
 from ui.input_panel import InputPanel
 from ui.result_grid import ResultGrid
 from ui.title_bar import CustomTitleBar
-import pandas as pd
-import platform
 
 
 class MainWindow:
