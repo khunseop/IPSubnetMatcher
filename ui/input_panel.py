@@ -28,7 +28,7 @@ class InputPanel(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(
             header_frame,
             text=title,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=14, weight="bold"),
             anchor="w",
             text_color=("#e0e0e0", "#e0e0e0")
         )
@@ -38,7 +38,7 @@ class InputPanel(ctk.CTkFrame):
         self.count_label = ctk.CTkLabel(
             header_frame,
             text="0개",
-            font=ctk.CTkFont(size=10),
+            font=ctk.CTkFont(size=12),
             text_color=("#888888", "#888888"),
             anchor="e"
         )
@@ -49,9 +49,9 @@ class InputPanel(ctk.CTkFrame):
             header_frame,
             text="초기화",
             command=self.clear_data,
-            font=ctk.CTkFont(size=9),
-            height=22,
-            width=50,
+            font=ctk.CTkFont(size=11),
+            height=26,
+            width=60,
             corner_radius=3,
             fg_color=("#333333", "#333333"),
             hover_color=("#444444", "#444444"),
@@ -59,17 +59,32 @@ class InputPanel(ctk.CTkFrame):
         )
         self.clear_btn.pack(side="right", padx=(8, 0))
         
-        # 텍스트 입력 영역 (완전 다크 테마)
-        self.textbox = ctk.CTkTextbox(
-            self,
-            font=ctk.CTkFont(size=10, family="Monaco"),
-            fg_color=("#1a1a1a", "#1a1a1a"),
-            text_color=("#d0d0d0", "#d0d0d0"),
-            border_color=("#333333", "#333333"),
-            border_width=1,
-            corner_radius=4,
-            wrap="none"
-        )
+        # 텍스트 입력 영역 (완전 다크 테마, 큰 글씨)
+        # Windows에서 잘 보이는 폰트: Consolas, Courier New, 'Courier New'
+        font_family = "Consolas"  # Windows에서 멋진 모노스페이스 폰트
+        try:
+            self.textbox = ctk.CTkTextbox(
+                self,
+                font=ctk.CTkFont(size=12, family=font_family),
+                fg_color=("#1a1a1a", "#1a1a1a"),
+                text_color=("#d0d0d0", "#d0d0d0"),
+                border_color=("#333333", "#333333"),
+                border_width=1,
+                corner_radius=4,
+                wrap="none"
+            )
+        except:
+            # 폰트가 없을 경우 기본 폰트 사용
+            self.textbox = ctk.CTkTextbox(
+                self,
+                font=ctk.CTkFont(size=12),
+                fg_color=("#1a1a1a", "#1a1a1a"),
+                text_color=("#d0d0d0", "#d0d0d0"),
+                border_color=("#333333", "#333333"),
+                border_width=1,
+                corner_radius=4,
+                wrap="none"
+            )
         self.textbox.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         
         # 텍스트 변경 감지 (debounce 적용)

@@ -17,7 +17,7 @@ class ResultGrid(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             header_frame,
             text="Results",
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=ctk.CTkFont(size=14, weight="bold"),
             anchor="w",
             text_color=("#e0e0e0", "#e0e0e0")
         )
@@ -27,23 +27,37 @@ class ResultGrid(ctk.CTkFrame):
         self.stats_label = ctk.CTkLabel(
             header_frame,
             text="0개",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=12),
             text_color=("#888888", "#888888"),
             anchor="e"
         )
         self.stats_label.pack(side="right")
         
-        # 텍스트 출력 영역 (완전 다크 테마)
-        self.textbox = ctk.CTkTextbox(
-            self,
-            font=ctk.CTkFont(size=10, family="Monaco"),
-            fg_color=("#1a1a1a", "#1a1a1a"),
-            text_color=("#d0d0d0", "#d0d0d0"),
-            border_color=("#333333", "#333333"),
-            border_width=1,
-            corner_radius=4,
-            wrap="none"
-        )
+        # 텍스트 출력 영역 (완전 다크 테마, 큰 글씨)
+        font_family = "Consolas"  # Windows에서 멋진 모노스페이스 폰트
+        try:
+            self.textbox = ctk.CTkTextbox(
+                self,
+                font=ctk.CTkFont(size=12, family=font_family),
+                fg_color=("#1a1a1a", "#1a1a1a"),
+                text_color=("#d0d0d0", "#d0d0d0"),
+                border_color=("#333333", "#333333"),
+                border_width=1,
+                corner_radius=4,
+                wrap="none"
+            )
+        except:
+            # 폰트가 없을 경우 기본 폰트 사용
+            self.textbox = ctk.CTkTextbox(
+                self,
+                font=ctk.CTkFont(size=12),
+                fg_color=("#1a1a1a", "#1a1a1a"),
+                text_color=("#d0d0d0", "#d0d0d0"),
+                border_color=("#333333", "#333333"),
+                border_width=1,
+                corner_radius=4,
+                wrap="none"
+            )
         self.textbox.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         
         # 데이터 저장용

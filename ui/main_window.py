@@ -24,6 +24,8 @@ class MainWindow:
         # 데이터 저장
         self.source_data = []
         self.reference_data = []
+        self.reference_cache = None  # Reference 파싱 캐시
+        self._last_reference_text = ''  # 마지막 Reference 텍스트 (캐시 무효화용)
         
         self.setup_ui()
     
@@ -89,9 +91,9 @@ class MainWindow:
             button_group,
             text="분석",
             command=self.start_analysis,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            height=30,
-            width=70,
+            font=ctk.CTkFont(size=12, weight="bold"),
+            height=32,
+            width=80,
             corner_radius=4,
             fg_color=("#333333", "#333333"),
             hover_color=("#444444", "#444444"),
@@ -104,9 +106,9 @@ class MainWindow:
             button_group,
             text="저장",
             command=self.export_to_excel,
-            font=ctk.CTkFont(size=11),
-            height=30,
-            width=70,
+            font=ctk.CTkFont(size=12),
+            height=32,
+            width=80,
             corner_radius=4,
             fg_color=("#333333", "#333333"),
             hover_color=("#444444", "#444444"),
@@ -119,9 +121,9 @@ class MainWindow:
             button_group,
             text="초기화",
             command=self.reset_all,
-            font=ctk.CTkFont(size=11),
-            height=30,
-            width=60,
+            font=ctk.CTkFont(size=12),
+            height=32,
+            width=70,
             corner_radius=4,
             fg_color=("#333333", "#333333"),
             hover_color=("#444444", "#444444"),
@@ -172,7 +174,7 @@ class MainWindow:
         self.progress_label = ctk.CTkLabel(
             status_frame,
             text="준비됨",
-            font=ctk.CTkFont(size=10),
+            font=ctk.CTkFont(size=11),
             text_color=("#888888", "#888888")
         )
         self.progress_label.pack(side="left")
@@ -185,6 +187,11 @@ class MainWindow:
         
         source_text = self.source_panel.get_text_content().strip()
         reference_text = self.reference_panel.get_text_content().strip()
+        
+        # Reference 데이터가 변경되면 캐시 무효화
+        if reference_text != getattr(self, '_last_reference_text', ''):
+            self.reference_cache = None
+            self._last_reference_text = reference_text
         
         if source_text and reference_text:
             self.analyze_btn.configure(state="normal")
@@ -216,25 +223,49 @@ class MainWindow:
             self.root.after(500, self._animate_loading)
     
     def perform_analysis(self):
-        """실제 분석 수행"""
+        """실제 분석 수행 (최적화)"""
         try:
+            # 진행 상황 업데이트
+            self.root.after(0, lambda: self.progress_label.configure(
+                text="Source 파싱 중...", text_color=("#888888", "#888888")
+            ))
+            
             # Source 데이터 파싱
             source_text = self.source_panel.get_text_content()
             self.source_data = IPParser.parse_text_input(source_text)
             
-            # Reference 데이터 파싱
-            reference_text = self.reference_panel.get_text_content()
-            parsed_refs = IPParser.parse_text_input(reference_text)
-            self.reference_data = []
-            for ref in parsed_refs:
-                self.reference_data.append({
-                    'original': ref['original'],
-                    'parsed': ref['parsed'],
-                    'type': ref['type']
-                })
+            # 진행 상황 업데이트
+            self.root.after(0, lambda: self.progress_label.configure(
+                text="Reference 파싱 중...", text_color=("#888888", "#888888")
+            ))
             
-            # 매칭 수행
-            results = Matcher.match(self.source_data, self.reference_data)
+            # Reference 데이터 파싱 (캐시 사용)
+            reference_text = self.reference_panel.get_text_content()
+            
+            if self.reference_cache is None:
+                # 캐시가 없으면 파싱
+                parsed_refs = IPParser.parse_text_input(reference_text)
+                self.reference_data = []
+                for ref in parsed_refs:
+                    self.reference_data.append({
+                        'original': ref['original'],
+                        'parsed': ref['parsed'],
+                        'type': ref['type']
+                    })
+                # 캐시 저장
+                self.reference_cache = self.reference_data.copy()
+            else:
+                # 캐시 사용
+                self.reference_data = self.reference_cache
+            
+            # 진행 상황 업데이트
+            self.root.after(0, lambda: self.progress_label.configure(
+                text=f"매칭 중... (Source: {len(self.source_data)}, Reference: {len(self.reference_data)})",
+                text_color=("#888888", "#888888")
+            ))
+            
+            # 매칭 수행 (최적화된 버전)
+            results = Matcher.match_optimized(self.source_data, self.reference_data)
             
             # UI 업데이트 (메인 스레드에서 실행)
             self.root.after(0, self.update_results, results)
@@ -366,6 +397,8 @@ class MainWindow:
         self.export_btn.configure(state="disabled")
         self.source_data = []
         self.reference_data = []
+        self.reference_cache = None
+        self._last_reference_text = ''
     
     def on_close(self):
         """윈도우 닫기"""
