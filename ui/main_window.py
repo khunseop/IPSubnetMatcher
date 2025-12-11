@@ -71,13 +71,18 @@ class MainWindow:
         ]
         
         for key, side, cursor, fill_x, fill_y in borders:
-            frame = ctk.CTkFrame(
-                self.root,
-                fg_color="transparent",
-                border_width=0,
-                width=self.resize_border_width if not fill_x else None,
-                height=self.resize_border_width if not fill_y else None
-            )
+            # width와 height는 None 대신 조건부로 전달하지 않음
+            frame_kwargs = {
+                'master': self.root,
+                'fg_color': "transparent",
+                'border_width': 0
+            }
+            if not fill_x:
+                frame_kwargs['width'] = self.resize_border_width
+            if not fill_y:
+                frame_kwargs['height'] = self.resize_border_width
+            
+            frame = ctk.CTkFrame(**frame_kwargs)
             if fill_x:
                 frame.pack(side=side, fill='x', expand=False)
             elif fill_y:
