@@ -12,7 +12,7 @@ class CustomTitleBar(ctk.CTkFrame):
             root_window: 루트 윈도우 (이동용)
             on_close: 닫기 콜백
         """
-        super().__init__(parent, height=32, corner_radius=0, fg_color="transparent")
+        super().__init__(parent, height=28, corner_radius=0, fg_color=("#1a1a1a", "#1a1a1a"), border_width=0)
         self.root_window = root_window
         self.on_close = on_close
         
@@ -29,11 +29,11 @@ class CustomTitleBar(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             self,
             text="IP Network Matcher",
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=11),
             anchor="w",
-            text_color=("#9ca3af", "#9ca3af")
+            text_color=("#888888", "#888888")
         )
-        title_label.pack(side="left", padx=12, pady=8)
+        title_label.pack(side="left", padx=10, pady=6)
         
         # 드래그 가능한 영역
         title_label.bind("<Button-1>", self.start_drag)
@@ -45,15 +45,15 @@ class CustomTitleBar(ctk.CTkFrame):
             self,
             text="✕",
             command=self.close_window,
-            width=24,
-            height=24,
-            corner_radius=4,
-            font=ctk.CTkFont(size=12),
+            width=22,
+            height=22,
+            corner_radius=3,
+            font=ctk.CTkFont(size=10),
             fg_color="transparent",
-            hover_color=("#ef4444", "#dc2626"),
-            text_color=("#9ca3af", "#9ca3af")
+            hover_color=("#f87171", "#f87171"),
+            text_color=("#888888", "#888888")
         )
-        close_btn.pack(side="right", padx=8, pady=4)
+        close_btn.pack(side="right", padx=8, pady=3)
         
         # 타이틀 바 전체를 드래그 가능하게
         self.bind("<Button-1>", self.start_drag)

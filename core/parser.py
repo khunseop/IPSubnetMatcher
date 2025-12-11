@@ -1,6 +1,7 @@
 """IP 포맷 파싱 모듈"""
 from typing import List, Optional, Union
 import ipaddress
+import re
 from utils.ip_utils import parse_ip_input
 
 
@@ -10,23 +11,24 @@ class IPParser:
     @staticmethod
     def parse_text_input(text: str) -> List[dict]:
         """
-        텍스트 입력을 파싱하여 IP 리스트 반환
+        텍스트 입력을 파싱하여 IP 리스트 반환 (콤마/개행 지원)
         
         Args:
-            text: 입력 텍스트 (줄 단위로 구분)
+            text: 입력 텍스트 (개행 또는 콤마로 구분)
             
         Returns:
             [{'original': str, 'parsed': IPv4Address|IPv4Network|Set, 'type': str}, ...]
         """
-        lines = text.strip().split('\n')
+        # 콤마와 개행 모두로 분리
+        items = re.split(r'[,\n]+', text.strip())
         results = []
         
-        for line in lines:
-            line = line.strip()
-            if not line:
+        for item in items:
+            item = item.strip()
+            if not item:
                 continue
             
-            parsed = parse_ip_input(line)
+            parsed = parse_ip_input(item)
             if parsed is None:
                 continue
             
@@ -41,7 +43,7 @@ class IPParser:
                 ip_type = 'Unknown'
             
             results.append({
-                'original': line,
+                'original': item,
                 'parsed': parsed,
                 'type': ip_type
             })
