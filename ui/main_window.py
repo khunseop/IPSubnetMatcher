@@ -228,12 +228,13 @@ class MainWindow:
             self.root.after(600, self._animate_loading)
     
     def perform_analysis(self):
-        """실제 분석 수행 (최적화)"""
+        """실제 분석 수행 (완전히 별도 스레드에서 실행, UI와 완전 분리)"""
         try:
-            # Source 파싱 진행률 콜백
+            # Source 파싱 진행률 콜백 (스레드 안전)
             def source_progress(current, total):
                 percent = (current * 100) // total if total > 0 else 0
-                self.root.after_idle(lambda: self.progress_label.configure(
+                # after를 사용하여 메인 스레드에서만 UI 업데이트
+                self.root.after(0, lambda: self.progress_label.configure(
                     text=f"Source 파싱 중... {current}/{total} ({percent}%)",
                     text_color=("#888888", "#888888")
                 ))
@@ -242,10 +243,11 @@ class MainWindow:
             source_text = self.source_panel.get_text_content()
             self.source_data = IPParser.parse_text_input(source_text, source_progress)
             
-            # Reference 파싱 진행률 콜백
+            # Reference 파싱 진행률 콜백 (스레드 안전)
             def ref_progress(current, total):
                 percent = (current * 100) // total if total > 0 else 0
-                self.root.after_idle(lambda: self.progress_label.configure(
+                # after를 사용하여 메인 스레드에서만 UI 업데이트
+                self.root.after(0, lambda: self.progress_label.configure(
                     text=f"Reference 파싱 중... {current}/{total} ({percent}%)",
                     text_color=("#888888", "#888888")
                 ))
@@ -257,6 +259,7 @@ class MainWindow:
                 # 캐시가 없으면 파싱 (배치 처리)
                 parsed_refs = IPParser.parse_text_input(reference_text, ref_progress)
                 self.reference_data = []
+                # Reference 변환 (빠르게 일괄 처리)
                 for ref in parsed_refs:
                     self.reference_data.append({
                         'original': ref['original'],
@@ -275,12 +278,12 @@ class MainWindow:
                 text_color=("#888888", "#888888")
             ))
             
-            # 진행률 콜백 함수 정의
+            # 진행률 콜백 함수 정의 (스레드 안전)
             def progress_callback(current, total):
-                """매칭 진행률 업데이트 (UI 스레드에서 실행)"""
+                """매칭 진행률 업데이트 (메인 스레드에서만 실행)"""
                 percent = (current * 100) // total if total > 0 else 0
-                # UI 업데이트는 메인 스레드에서만
-                self.root.after_idle(lambda: self.progress_label.configure(
+                # after를 사용하여 메인 스레드에서만 UI 업데이트
+                self.root.after(0, lambda: self.progress_label.configure(
                     text=f"매칭 중... {current}/{total} ({percent}%)",
                     text_color=("#888888", "#888888")
                 ))

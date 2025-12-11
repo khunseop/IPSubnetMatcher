@@ -193,8 +193,11 @@ class Matcher:
                 'matched_ips': matched_ips_str
             })
             
-            # 진행률 콜백 호출 (매 50개마다 또는 마지막)
-            if progress_callback and (idx % 50 == 0 or idx == total_sources - 1):
+            # 진행률 콜백 호출 (매 20개마다 또는 마지막) - 성능과 UI 반응성 균형
+            if progress_callback and (idx % 20 == 0 or idx == total_sources - 1):
                 progress_callback(idx + 1, total_sources)
+                # 스레드에서 실행 중이므로 매우 짧은 대기로 GIL이 다른 스레드에 양보
+                import time
+                time.sleep(0.001)  # 1ms 대기로 UI 스레드에 최소한의 시간 제공
         
         return results

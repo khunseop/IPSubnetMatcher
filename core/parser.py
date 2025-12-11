@@ -8,8 +8,8 @@ from utils.ip_utils import parse_ip_input
 class IPParser:
     """IP 입력 파싱 클래스 - 배치 처리 및 비동기 지원"""
     
-    # 배치 크기 (한 번에 처리할 항목 수)
-    BATCH_SIZE = 1000
+    # 배치 크기 (한 번에 처리할 항목 수) - 성능과 UI 반응성의 균형
+    BATCH_SIZE = 500  # 적당한 크기로 성능 유지하면서 UI 업데이트 가능
     
     @staticmethod
     def parse_text_input(text: str, progress_callback: Optional[Callable[[int, int], None]] = None) -> List[dict]:
@@ -43,9 +43,13 @@ class IPParser:
             batch_results = IPParser._parse_batch(batch_items)
             results.extend(batch_results)
             
-            # 진행률 업데이트
+            # 진행률 업데이트 (콜백이 있으면 호출)
             if progress_callback:
                 progress_callback(batch_end, total)
+                # 스레드에서 실행 중이므로 매우 짧은 대기로 GIL이 다른 스레드에 양보
+                # 너무 길면 성능 저하, 너무 짧으면 의미 없음
+                import time
+                time.sleep(0.001)  # 1ms 대기로 UI 스레드에 최소한의 시간 제공
         
         return results
     
