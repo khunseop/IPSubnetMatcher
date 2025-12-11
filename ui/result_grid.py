@@ -17,7 +17,7 @@ class ResultGrid(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             header_frame,
             text="Results",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=15, weight="bold"),
             anchor="w",
             text_color=("#e0e0e0", "#e0e0e0")
         )
@@ -27,7 +27,7 @@ class ResultGrid(ctk.CTkFrame):
         self.stats_label = ctk.CTkLabel(
             header_frame,
             text="0개",
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=13),
             text_color=("#888888", "#888888"),
             anchor="e"
         )
@@ -38,7 +38,7 @@ class ResultGrid(ctk.CTkFrame):
         try:
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=12, family=font_family),
+                font=ctk.CTkFont(size=14, family=font_family),
                 fg_color=("#1a1a1a", "#1a1a1a"),
                 text_color=("#d0d0d0", "#d0d0d0"),
                 border_color=("#333333", "#333333"),
@@ -50,7 +50,7 @@ class ResultGrid(ctk.CTkFrame):
             # 폰트가 없을 경우 기본 폰트 사용
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=12),
+                font=ctk.CTkFont(size=14),
                 fg_color=("#1a1a1a", "#1a1a1a"),
                 text_color=("#d0d0d0", "#d0d0d0"),
                 border_color=("#333333", "#333333"),

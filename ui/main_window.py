@@ -137,29 +137,31 @@ class MainWindow:
         )
         self.reset_btn.pack(side="left")
         
-        # 3열 레이아웃 (컴팩트)
+        # 3열 레이아웃 (입력창 너비 줄이고 결과창 넓히기)
         columns_frame = ctk.CTkFrame(inner_container, fg_color="transparent")
         columns_frame.pack(fill="both", expand=True)
         
-        # 좌측: Source 패널
+        # 좌측: Source 패널 (너비 제한)
         self.source_panel = InputPanel(
             columns_frame,
             "Source",
             is_reference=False,
             on_data_change=self.on_data_change
         )
-        self.source_panel.pack(side="left", fill="both", expand=True, padx=(0, 3))
+        self.source_panel.pack(side="left", fill="both", expand=False, padx=(0, 3))
+        self.source_panel.configure(width=280)  # 고정 너비
         
-        # 중앙: Reference 패널
+        # 중앙: Reference 패널 (너비 제한)
         self.reference_panel = InputPanel(
             columns_frame,
             "Reference",
             is_reference=True,
             on_data_change=self.on_data_change
         )
-        self.reference_panel.pack(side="left", fill="both", expand=True, padx=(3, 3))
+        self.reference_panel.pack(side="left", fill="both", expand=False, padx=(3, 3))
+        self.reference_panel.configure(width=280)  # 고정 너비
         
-        # 우측: 결과 패널
+        # 우측: 결과 패널 (넓게)
         self.result_grid = ResultGrid(columns_frame)
         self.result_grid.pack(side="left", fill="both", expand=True, padx=(3, 0))
         

@@ -28,7 +28,7 @@ class InputPanel(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(
             header_frame,
             text=title,
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=ctk.CTkFont(size=14, weight="bold"),
             anchor="w",
             text_color=("#e0e0e0", "#e0e0e0")
         )
@@ -39,9 +39,9 @@ class InputPanel(ctk.CTkFrame):
             header_frame,
             text="초기화",
             command=self.clear_data,
-            font=ctk.CTkFont(size=10),
-            height=24,
-            width=55,
+            font=ctk.CTkFont(size=11),
+            height=26,
+            width=60,
             corner_radius=4,
             fg_color=("#2a2a2a", "#2a2a2a"),
             hover_color=("#3a3a3a", "#3a3a3a"),
@@ -55,7 +55,7 @@ class InputPanel(ctk.CTkFrame):
         self.count_label = ctk.CTkLabel(
             header_frame,
             text="0개",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=12),
             text_color=("#888888", "#888888"),
             anchor="e"
         )
@@ -67,7 +67,7 @@ class InputPanel(ctk.CTkFrame):
         try:
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=12, family=font_family),
+                font=ctk.CTkFont(size=14, family=font_family),
                 fg_color=("#1a1a1a", "#1a1a1a"),
                 text_color=("#d0d0d0", "#d0d0d0"),
                 border_color=("#333333", "#333333"),
@@ -79,7 +79,7 @@ class InputPanel(ctk.CTkFrame):
             # 폰트가 없을 경우 기본 폰트 사용
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=12),
+                font=ctk.CTkFont(size=14),
                 fg_color=("#1a1a1a", "#1a1a1a"),
                 text_color=("#d0d0d0", "#d0d0d0"),
                 border_color=("#333333", "#333333"),
