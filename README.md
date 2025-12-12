@@ -189,14 +189,12 @@ IPSubnetMatcher/
 ├── core/                   # 핵심 로직
 │   ├── __init__.py
 │   ├── parser.py          # IP 파싱 (배치 처리, 비동기 지원)
-│   ├── matcher.py         # 매칭 엔진 (고성능 최적화)
-│   └── excel_handler.py   # 엑셀 처리
+│   └── matcher.py         # 매칭 엔진 (고성능 최적화)
 ├── ui/                     # UI 모듈
 │   ├── __init__.py
 │   ├── main_window.py     # 메인 윈도우
 │   ├── input_panel.py     # 입력 패널
-│   ├── result_grid.py     # 결과 표시
-│   └── title_bar.py       # 커스텀 타이틀 바
+│   └── result_grid.py     # 결과 표시
 └── utils/                  # 유틸리티
     ├── __init__.py
     └── ip_utils.py         # IP 관련 유틸리티
