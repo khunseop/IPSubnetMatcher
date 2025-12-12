@@ -17,8 +17,8 @@ echo.
 echo 빌드 시작...
 echo.
 
-REM 빌드 실행
-pyinstaller build_windows.spec --clean
+REM 빌드 실행 (customtkinter assets 자동 포함)
+pyinstaller build_windows.spec --clean --collect-all customtkinter
 
 if errorlevel 1 (
     echo.

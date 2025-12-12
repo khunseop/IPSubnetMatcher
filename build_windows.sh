@@ -17,8 +17,8 @@ echo ""
 echo "빌드 시작..."
 echo ""
 
-# 빌드 실행
-pyinstaller build_windows.spec --clean
+# 빌드 실행 (customtkinter assets 자동 포함)
+pyinstaller build_windows.spec --clean --collect-all customtkinter
 
 if [ $? -ne 0 ]; then
     echo ""
