@@ -117,16 +117,63 @@ Python 3.11 이상을 사용하면 더 작은 실행 파일을 생성할 수 있
 ### 방법 6: Nuitka 사용 (대안)
 PyInstaller 대신 Nuitka를 사용하면 더 작은 실행 파일을 만들 수 있습니다.
 
+**기본 Nuitka 빌드:**
 ```bash
 pip install nuitka
 python -m nuitka --standalone --onefile --windows-disable-console --include-package=customtkinter --include-package=openpyxl main.py
 ```
 
+**Nuitka + UPX 압축 (동시 사용 가능):**
+Nuitka는 UPX 플러그인을 지원합니다 (버전 0.7 이상).
+
+```bash
+# UPX 플러그인 활성화
+python -m nuitka --standalone --onefile --windows-disable-console \
+  --plugin-enable=upx \
+  --upx-binary=upx \
+  --include-package=customtkinter \
+  --include-package=openpyxl \
+  main.py
+```
+
+**주의사항:**
+- Windows 시스템 DLL (`vcruntime140.dll` 등)은 UPX 압축에서 제외해야 합니다
+- 압축 비율이 낮으면 `NotCompressibleException` 오류가 발생할 수 있습니다
+- 호환성 문제가 발생하면 UPX 없이 빌드하거나 시스템 DLL을 제외하세요
+
+**시스템 DLL 제외 예시:**
+```bash
+python -m nuitka --standalone --onefile --windows-disable-console \
+  --plugin-enable=upx \
+  --upx-exclude=vcruntime140.dll \
+  --upx-exclude=python*.dll \
+  --include-package=customtkinter \
+  --include-package=openpyxl \
+  main.py
+```
+
+**Nuitka 추가 최적화 옵션:**
+```bash
+python -m nuitka --standalone --onefile --windows-disable-console \
+  --plugin-enable=upx \
+  --lto=yes \  # Link Time Optimization
+  --remove-output \  # 빌드 후 임시 파일 제거
+  --include-package=customtkinter \
+  --include-package=openpyxl \
+  main.py
+```
+
 ## 예상 용량 감소
 
+### PyInstaller 기준:
 - 기본 최적화: **20-30% 감소**
 - UPX 압축 추가: **40-50% 감소**
 - 폴더 모드: **30-40% 감소** (단일 파일 대비)
+
+### Nuitka 기준:
+- 기본 빌드: **PyInstaller 대비 10-20% 작음**
+- Nuitka + UPX: **PyInstaller + UPX 대비 5-15% 작음**
+- Nuitka + LTO: **추가 5-10% 감소**
 
 ## 빌드 후 확인
 

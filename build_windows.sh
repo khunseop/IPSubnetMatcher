@@ -19,6 +19,17 @@ if [ $? -ne 0 ]; then
     pip install pyinstaller
 fi
 
+# UPX 확인 (선택사항)
+if command -v upx &> /dev/null; then
+    echo "UPX 발견됨 - 압축 활성화"
+else
+    echo ""
+    echo "참고: UPX가 설치되지 않았습니다. (선택사항)"
+    echo "UPX 설치 시 실행 파일 용량이 더 작아집니다."
+    echo "설치 방법: UPX_SETUP.md 파일 참조"
+    echo ""
+fi
+
 echo ""
 echo "빌드 시작..."
 echo ""

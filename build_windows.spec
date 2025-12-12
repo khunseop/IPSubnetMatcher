@@ -101,7 +101,8 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=True,  # 디버그 심볼 제거로 용량 감소
-    upx=True,  # UPX 압축 활성화
+    upx=True,  # UPX 압축 활성화 (UPX가 PATH에 있거나 upx_dir로 경로 지정 필요)
+    # upx_dir=r'C:\UPX',  # UPX 경로 직접 지정 (PATH에 없을 경우 주석 해제하고 경로 수정)
     upx_exclude=[
         'vcruntime140.dll',  # Windows 런타임 DLL은 UPX 압축 제외 (호환성)
         'python*.dll',  # Python DLL은 UPX 압축 제외
