@@ -109,3 +109,4 @@ python -c "import main; import sys; print(sys.modules.keys())"
 1. `console=False`로 변경
 2. `strip=True`로 변경
 3. 필요한 모듈만 `excludes`에 추가
+

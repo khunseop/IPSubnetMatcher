@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller 스펙 파일 - Windows 빌드용
+# PyInstaller 스펙 파일 - Windows 빌드용 (최적화 버전: 폴더 모드)
+# 폴더 모드는 단일 파일보다 용량이 작을 수 있습니다
 
 block_cipher = None
 
@@ -70,7 +71,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=find_customtkinter_assets() + [('icons8-비교-50.ico', '.')],  # customtkinter assets 및 아이콘 파일 포함
+    datas=find_customtkinter_assets() + [('icons8-비교-50.ico', '.')],
     hiddenimports=[
         'customtkinter',
         'customtkinter.windows',
@@ -84,7 +85,6 @@ a = Analysis(
         'PIL._tkinter_finder',
         'PIL.Image',
         'PIL.ImageTk',
-        # openpyxl 최소한만 포함
         'openpyxl',
         'openpyxl.styles',
         'openpyxl.workbook',
@@ -105,21 +105,15 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        # 불필요한 표준 라이브러리 제외 (기본 인코딩은 제외하지 않음)
         'matplotlib', 'numpy', 'scipy', 'pandas', 'pytest', 'unittest',
         'email', 'http', 'urllib3', 'requests', 'xmlrpc', 'distutils',
         'pydoc', 'doctest', 'pdb', 'bdb', 'curses', 'readline',
-        # 불필요한 GUI 관련
         'tkinter.test', 'tkinter.tix', 'tkinter.scrolledtext',
-        # 불필요한 데이터베이스
         'sqlite3', 'dbm', 'gdbm',
-        # 불필요한 멀티미디어
         'audioop', 'wave', 'aifc', 'sunau',
-        # openpyxl 불필요한 부분 제외
         'openpyxl.chart', 'openpyxl.chartsheet', 'openpyxl.comments',
         'openpyxl.drawing', 'openpyxl.formula', 'openpyxl.packaging',
         'openpyxl.pivot', 'openpyxl.reader', 'openpyxl.writer',
-        # 일부 불필요한 인코딩만 제외 (기본 인코딩은 유지)
         'encodings.cp437', 'encodings.cp850', 'encodings.cp852',
         'encodings.cp855', 'encodings.cp856', 'encodings.cp857',
         'encodings.cp858', 'encodings.cp860', 'encodings.cp861',
@@ -142,7 +136,6 @@ a = Analysis(
         'encodings.utf_16', 'encodings.utf_16_be', 'encodings.utf_16_le',
         'encodings.utf_32', 'encodings.utf_32_be', 'encodings.utf_32_le',
         'encodings.utf_7', 'encodings.uu_codec', 'encodings.zlib_codec',
-        # 불필요한 기타 모듈
         'lib2to3', 'pydoc_data', 'test', 'tests',
         'setuptools', 'wheel', 'pip',
     ],
@@ -154,30 +147,42 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
+# 폴더 모드 (단일 파일보다 작을 수 있음)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    [],
+    [],  # 빈 리스트로 변경하여 폴더 모드 활성화
+    exclude_binaries=True,  # 바이너리를 별도로 분리
     name='IPNetworkMatcher',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=False,  # 디버깅용으로 strip 비활성화 (오류 해결 후 True로 변경 가능)
-    upx=True,  # UPX 압축 활성화 (UPX가 PATH에 있거나 upx_dir로 경로 지정 필요)
-    # upx_dir=r'C:\UPX',  # UPX 경로 직접 지정 (PATH에 없을 경우 주석 해제하고 경로 수정)
+    strip=True,
+    upx=True,
     upx_exclude=[
-        'vcruntime140.dll',  # Windows 런타임 DLL은 UPX 압축 제외 (호환성)
-        'python*.dll',  # Python DLL은 UPX 압축 제외
+        'vcruntime140.dll',
+        'python*.dll',
     ],
     runtime_tmpdir=None,
-    console=True,  # 디버깅용 콘솔 활성화 (오류 확인 후 False로 변경 가능)
+    console=False,  # GUI 애플리케이션이므로 콘솔 창 숨김
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='icons8-비교-50.ico',  # 아이콘 파일 경로 지정 (Windows 실행 파일 아이콘)
+    icon='icons8-비교-50.ico',
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=True,
+    upx=True,
+    upx_exclude=[
+        'vcruntime140.dll',
+        'python*.dll',
+    ],
+    name='IPNetworkMatcher',
 )
 
