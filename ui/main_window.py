@@ -50,8 +50,8 @@ class MainWindow:
         # 윈도우 중앙 배치
         self.center_window()
         
-        # 배경색 설정 (미니멀)
-        self.root.configure(bg="#ffffff")
+        # 배경색 설정 (모던 라이트 - 부드러운 회색)
+        self.root.configure(bg="#f5f7fa")
     
     def set_icon(self):
         """윈도우 아이콘 설정"""
@@ -101,10 +101,10 @@ class MainWindow:
         # 커스텀 타이틀 바는 기본 타이틀 바를 사용하므로 제거
         # macOS에서는 기본 타이틀 바가 더 잘 작동함
         
-        # 메인 컨테이너 (미니멀)
+        # 메인 컨테이너 (모던 라이트)
         main_container = ctk.CTkFrame(
             self.root,
-            fg_color=("#ffffff", "#ffffff"),
+            fg_color=("#f5f7fa", "#f5f7fa"),
             corner_radius=0,
             border_width=0
         )
@@ -122,14 +122,29 @@ class MainWindow:
         button_group = ctk.CTkFrame(control_frame, fg_color="transparent")
         button_group.pack(side="right")
         
+        # Pretendard 폰트 설정 (fallback 포함)
+        try:
+            self.default_font = ctk.CTkFont(family="Pretendard", size=12, weight="normal")
+            self.bold_font = ctk.CTkFont(family="Pretendard", size=12, weight="bold")
+            self.small_font = ctk.CTkFont(family="Pretendard", size=11)
+            self.small_bold_font = ctk.CTkFont(family="Pretendard", size=10, weight="bold")
+        except:
+            self.default_font = ctk.CTkFont(size=12)
+            self.bold_font = ctk.CTkFont(size=12, weight="bold")
+            self.small_font = ctk.CTkFont(size=11)
+            self.small_bold_font = ctk.CTkFont(size=10, weight="bold")
+        
         self.analyze_btn = ctk.CTkButton(
             button_group,
             text="분석",
             command=self.start_analysis,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=self.bold_font,
             height=28,
             width=70,
-            corner_radius=6
+            corner_radius=6,
+            fg_color=("#3b82f6", "#3b82f6"),
+            hover_color=("#2563eb", "#2563eb"),
+            text_color=("white", "white")
         )
         self._loading_active = False
         self.analyze_btn.pack(side="left", padx=(0, 4))
@@ -138,11 +153,14 @@ class MainWindow:
             button_group,
             text="저장",
             command=self.export_to_excel,
-            font=ctk.CTkFont(size=12),
+            font=self.default_font,
             height=28,
             width=70,
             corner_radius=6,
-            state="disabled"
+            state="disabled",
+            fg_color=("#e5e7eb", "#e5e7eb"),
+            hover_color=("#d1d5db", "#d1d5db"),
+            text_color=("#374151", "#374151")
         )
         self.export_btn.pack(side="left", padx=(0, 4))
         
@@ -150,10 +168,13 @@ class MainWindow:
             button_group,
             text="초기화",
             command=self.reset_all,
-            font=ctk.CTkFont(size=12),
+            font=self.default_font,
             height=28,
             width=60,
-            corner_radius=6
+            corner_radius=6,
+            fg_color=("#e5e7eb", "#e5e7eb"),
+            hover_color=("#d1d5db", "#d1d5db"),
+            text_color=("#374151", "#374151")
         )
         self.reset_btn.pack(side="left")
         
@@ -193,8 +214,8 @@ class MainWindow:
         self.loading_label = ctk.CTkLabel(
             status_frame,
             text="●",
-            font=ctk.CTkFont(size=10, weight="bold"),
-            text_color=("#2563eb", "#2563eb")
+            font=self.small_bold_font,
+            text_color=("#3b82f6", "#3b82f6")
         )
         self.loading_label.pack(side="left", padx=(0, 6))
         self.loading_label.pack_forget()
@@ -202,7 +223,7 @@ class MainWindow:
         self.progress_label = ctk.CTkLabel(
             status_frame,
             text="준비됨",
-            font=ctk.CTkFont(size=11),
+            font=self.small_font,
             text_color=("#6b7280", "#6b7280")
         )
         self.progress_label.pack(side="left")
@@ -232,10 +253,10 @@ class MainWindow:
         if self._loading_active:
             # 간단한 펄스 애니메이션 (성능 최적화)
             current_color = self.loading_label.cget("text_color")[0]
-            if current_color == "#2563eb":
-                new_color = "#93c5fd"
+            if current_color == "#3b82f6":
+                new_color = "#60a5fa"
             else:
-                new_color = "#2563eb"
+                new_color = "#3b82f6"
             self.loading_label.configure(text_color=(new_color, new_color))
             self.root.after(500, self._animate_loading)
     

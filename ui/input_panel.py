@@ -17,7 +17,7 @@ class InputPanel(ctk.CTkFrame):
         """
         super().__init__(
             parent, 
-            corner_radius=6, 
+            corner_radius=8, 
             border_width=1, 
             border_color=("#e5e7eb", "#e5e7eb"),
             fg_color=("#ffffff", "#ffffff")
@@ -30,11 +30,21 @@ class InputPanel(ctk.CTkFrame):
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
         header_frame.pack(fill="x", padx=6, pady=(6, 4))
         
+        # Pretendard 폰트 설정
+        try:
+            title_font = ctk.CTkFont(family="Pretendard", size=14, weight="bold")
+            default_font = ctk.CTkFont(family="Pretendard", size=11)
+            text_font = ctk.CTkFont(family="Pretendard", size=12)
+        except:
+            title_font = ctk.CTkFont(size=14, weight="bold")
+            default_font = ctk.CTkFont(size=11)
+            text_font = ctk.CTkFont(size=12)
+        
         # 제목 레이블
         self.title_label = ctk.CTkLabel(
             header_frame,
             text=title,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=title_font,
             anchor="w",
             text_color=("#111827", "#111827")
         )
@@ -45,7 +55,7 @@ class InputPanel(ctk.CTkFrame):
             header_frame,
             text="초기화",
             command=self.clear_data,
-            font=ctk.CTkFont(size=11),
+            font=default_font,
             height=22,
             width=50,
             corner_radius=4,
@@ -60,34 +70,39 @@ class InputPanel(ctk.CTkFrame):
         self.count_label = ctk.CTkLabel(
             header_frame,
             text="0개",
-            font=ctk.CTkFont(size=11),
+            font=default_font,
             text_color=("#6b7280", "#6b7280"),
             anchor="e"
         )
         self.count_label.pack(side="right", padx=(0, 6))
         
-        # 텍스트 입력 영역 (미니멀)
-        font_family = "Consolas"
+        # 텍스트 입력 영역 (모던 다크)
+        try:
+            # 코드 폰트는 Consolas 유지하되 Pretendard와 함께 사용
+            code_font = ctk.CTkFont(family="Consolas", size=12)
+        except:
+            code_font = text_font
+        
         try:
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=12, family=font_family),
+                font=code_font,
                 fg_color=("#ffffff", "#ffffff"),
                 text_color=("#111827", "#111827"),
                 border_color=("#e5e7eb", "#e5e7eb"),
                 border_width=1,
-                corner_radius=4,
+                corner_radius=6,
                 wrap="none"
             )
         except:
             self.textbox = ctk.CTkTextbox(
                 self,
-                font=ctk.CTkFont(size=12),
+                font=text_font,
                 fg_color=("#ffffff", "#ffffff"),
                 text_color=("#111827", "#111827"),
                 border_color=("#e5e7eb", "#e5e7eb"),
                 border_width=1,
-                corner_radius=4,
+                corner_radius=6,
                 wrap="none"
             )
         self.textbox.pack(fill="both", expand=True, padx=6, pady=(0, 6))
@@ -132,8 +147,8 @@ class InputPanel(ctk.CTkFrame):
         new_text = f"{count}개"
         
         if current_text != new_text:
-            # 간단한 색상 변경
-            self.count_label.configure(text=new_text, text_color=("#2563eb", "#2563eb"))
+            # 간단한 색상 변경 (파란색 포인트)
+            self.count_label.configure(text=new_text, text_color=("#3b82f6", "#3b82f6"))
             self.after(200, lambda: self.count_label.configure(text_color=("#6b7280", "#6b7280")))
         else:
             self.count_label.configure(text=new_text)
