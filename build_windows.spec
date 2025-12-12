@@ -34,17 +34,36 @@ a = Analysis(
     datas=find_customtkinter_assets() + [('icons8-비교-50.ico', '.')],  # customtkinter assets 및 아이콘 파일 포함
     hiddenimports=[
         'customtkinter',
+        'customtkinter.windows',
+        'customtkinter.windows.ctk_tk',
+        'customtkinter.windows.ctk_frame',
+        'customtkinter.windows.ctk_button',
+        'customtkinter.windows.ctk_label',
+        'customtkinter.windows.ctk_textbox',
+        'customtkinter.windows.ctk_font',
+        'PIL',
+        'PIL._tkinter_finder',
+        'PIL.Image',
+        'PIL.ImageTk',
         'openpyxl',
         'openpyxl.styles',
+        'openpyxl.workbook',
+        'openpyxl.worksheet',
         'tkinter',
         'tkinter.filedialog',
+        'tkinter.messagebox',
+        'tkinter.font',
         'threading',
+        'ipaddress',
+        'json',
+        're',
+        'typing',
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        # 불필요한 표준 라이브러리 제외
+        # 불필요한 표준 라이브러리 제외 (기본 인코딩은 제외하지 않음)
         'matplotlib', 'numpy', 'scipy', 'pandas', 'pytest', 'unittest',
         'email', 'http', 'urllib3', 'requests', 'xmlrpc', 'distutils',
         'pydoc', 'doctest', 'pdb', 'bdb', 'curses', 'readline',
@@ -54,7 +73,7 @@ a = Analysis(
         'sqlite3', 'dbm', 'gdbm',
         # 불필요한 멀티미디어
         'audioop', 'wave', 'aifc', 'sunau',
-        # 불필요한 인코딩
+        # 일부 불필요한 인코딩만 제외 (기본 인코딩은 유지)
         'encodings.cp437', 'encodings.cp850', 'encodings.cp852',
         'encodings.cp855', 'encodings.cp856', 'encodings.cp857',
         'encodings.cp858', 'encodings.cp860', 'encodings.cp861',
@@ -63,7 +82,7 @@ a = Analysis(
         'encodings.cp874', 'encodings.cp875', 'encodings.cp932',
         'encodings.cp949', 'encodings.cp950', 'encodings.cp1006',
         'encodings.cp1026', 'encodings.cp1140', 'encodings.cp1250',
-        'encodings.cp1251', 'encodings.cp1252', 'encodings.cp1253',
+        'encodings.cp1251', 'encodings.cp1253',
         'encodings.cp1254', 'encodings.cp1255', 'encodings.cp1256',
         'encodings.cp1257', 'encodings.cp1258', 'encodings.euc_jp',
         'encodings.euc_jis_2004', 'encodings.euc_jisx0213', 'encodings.euc_kr',
@@ -71,15 +90,14 @@ a = Analysis(
         'encodings.hz', 'encodings.iso2022_jp', 'encodings.iso2022_jp_1',
         'encodings.iso2022_jp_2', 'encodings.iso2022_jp_2004',
         'encodings.iso2022_jp_3', 'encodings.iso2022_jp_ext', 'encodings.iso2022_kr',
-        'encodings.latin_1', 'encodings.mbcs', 'encodings.palmos',
-        'encodings.ptcp154', 'encodings.quopri_codec', 'encodings.raw_unicode_escape',
-        'encodings.rot_13', 'encodings.shift_jis', 'encodings.shift_jis_2004',
-        'encodings.shift_jisx0213', 'encodings.tis_620', 'encodings.unicode_escape',
+        'encodings.palmos', 'encodings.ptcp154', 'encodings.quopri_codec',
+        'encodings.raw_unicode_escape', 'encodings.rot_13', 'encodings.shift_jis',
+        'encodings.shift_jis_2004', 'encodings.shift_jisx0213', 'encodings.tis_620',
         'encodings.utf_16', 'encodings.utf_16_be', 'encodings.utf_16_le',
         'encodings.utf_32', 'encodings.utf_32_be', 'encodings.utf_32_le',
         'encodings.utf_7', 'encodings.uu_codec', 'encodings.zlib_codec',
         # 불필요한 기타 모듈
-        'lib2to3', 'pydoc_data', 'test', 'tests', 'distutils',
+        'lib2to3', 'pydoc_data', 'test', 'tests',
         'setuptools', 'wheel', 'pip',
     ],
     win_no_prefer_redirects=False,
@@ -100,7 +118,7 @@ exe = EXE(
     name='IPNetworkMatcher',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=True,  # 디버그 심볼 제거로 용량 감소
+    strip=False,  # 디버깅용으로 strip 비활성화 (오류 해결 후 True로 변경 가능)
     upx=True,  # UPX 압축 활성화 (UPX가 PATH에 있거나 upx_dir로 경로 지정 필요)
     # upx_dir=r'C:\UPX',  # UPX 경로 직접 지정 (PATH에 없을 경우 주석 해제하고 경로 수정)
     upx_exclude=[
@@ -108,7 +126,7 @@ exe = EXE(
         'python*.dll',  # Python DLL은 UPX 압축 제외
     ],
     runtime_tmpdir=None,
-    console=False,  # GUI 애플리케이션이므로 콘솔 창 숨김
+    console=True,  # 디버깅용 콘솔 활성화 (오류 확인 후 False로 변경 가능)
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
