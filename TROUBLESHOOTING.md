@@ -64,6 +64,30 @@ pyinstaller build_windows.spec --clean
 
 ## 일반적인 빌드 오류
 
+### "PYI 22112 Error: failed to extract customtkinter\asset\DS_store"
+
+이 오류는 macOS의 `.DS_Store` 파일이 Windows 빌드에 포함되어 발생합니다.
+
+**해결 방법:**
+1. `build_windows.spec` 파일이 최신 버전인지 확인 (이미 수정됨)
+2. 빌드 캐시 삭제 후 재빌드:
+   ```cmd
+   rmdir /s /q build dist
+   pyinstaller build_windows.spec --clean
+   ```
+
+**원인:**
+- `.DS_Store`는 macOS의 폴더 메타데이터 파일입니다
+- Windows에서는 필요하지 않고 PyInstaller가 추출할 수 없어 오류가 발생합니다
+- `find_customtkinter_assets()` 함수에서 자동으로 제외하도록 수정되었습니다
+
+**수동으로 확인:**
+만약 문제가 계속되면, conda 환경의 customtkinter 패키지에서 직접 `.DS_Store` 파일을 삭제할 수 있습니다:
+```bash
+# conda 환경의 customtkinter assets 폴더에서 .DS_Store 찾기
+find $CONDA_PREFIX/lib/python*/site-packages/customtkinter/assets -name ".DS_Store" -delete
+```
+
 ### "ModuleNotFoundError"
 
 해결:

@@ -22,6 +22,16 @@ def find_customtkinter_assets():
         # blue 테마만 사용하므로 필요한 파일만 필터링
         files_to_include = []
         
+        # 제외할 파일 패턴 (macOS 메타데이터 파일 등)
+        exclude_patterns = ['.DS_Store', '._', 'Thumbs.db']
+        
+        def should_exclude(filename):
+            """파일명이 제외 패턴에 해당하는지 확인"""
+            for pattern in exclude_patterns:
+                if filename.startswith(pattern) or filename == pattern:
+                    return True
+            return False
+        
         # assets 폴더 구조: assets/themes/blue/, assets/themes/dark-blue/, etc.
         themes_path = os.path.join(assets_path, 'themes')
         if os.path.exists(themes_path):
@@ -29,13 +39,18 @@ def find_customtkinter_assets():
             blue_theme_path = os.path.join(themes_path, 'blue')
             if os.path.exists(blue_theme_path):
                 for root, dirs, files in os.walk(blue_theme_path):
+                    # .DS_Store가 있는 디렉토리도 제외
+                    dirs[:] = [d for d in dirs if not should_exclude(d)]
                     for file in files:
-                        file_path = os.path.join(root, file)
-                        rel_path = os.path.relpath(file_path, ctk_path)
-                        files_to_include.append((file_path, os.path.join('customtkinter', rel_path)))
+                        if not should_exclude(file):
+                            file_path = os.path.join(root, file)
+                            rel_path = os.path.relpath(file_path, ctk_path)
+                            files_to_include.append((file_path, os.path.join('customtkinter', rel_path)))
             
             # 공통 assets (themes 외부의 파일들)
             for item in os.listdir(assets_path):
+                if should_exclude(item):
+                    continue
                 item_path = os.path.join(assets_path, item)
                 if os.path.isfile(item_path):
                     rel_path = os.path.relpath(item_path, ctk_path)
@@ -43,10 +58,13 @@ def find_customtkinter_assets():
                 elif os.path.isdir(item_path) and item != 'themes':
                     # themes 외의 다른 폴더도 포함 (예: images 등)
                     for root, dirs, files in os.walk(item_path):
+                        # .DS_Store가 있는 디렉토리도 제외
+                        dirs[:] = [d for d in dirs if not should_exclude(d)]
                         for file in files:
-                            file_path = os.path.join(root, file)
-                            rel_path = os.path.relpath(file_path, ctk_path)
-                            files_to_include.append((file_path, os.path.join('customtkinter', rel_path)))
+                            if not should_exclude(file):
+                                file_path = os.path.join(root, file)
+                                rel_path = os.path.relpath(file_path, ctk_path)
+                                files_to_include.append((file_path, os.path.join('customtkinter', rel_path)))
         
         # 필터링된 파일이 있으면 반환, 없으면 전체 포함 (안전장치)
         if files_to_include:
@@ -55,13 +73,24 @@ def find_customtkinter_assets():
             # 필터링 실패 시 전체 포함 (안전)
             return [(assets_path, 'customtkinter/assets')]
     except Exception as e:
-        # 오류 발생 시 전체 포함 (안전)
+        # 오류 발생 시 전체 포함하되 .DS_Store는 제외 (안전)
         try:
             import customtkinter
             ctk_path = os.path.dirname(customtkinter.__file__)
             assets_path = os.path.join(ctk_path, 'assets')
             if os.path.exists(assets_path):
-                return [(assets_path, 'customtkinter/assets')]
+                # 전체 포함하되 .DS_Store는 제외하는 방법
+                # PyInstaller의 Tree 함수를 사용하거나 필터링된 리스트 반환
+                filtered_files = []
+                exclude_patterns = ['.DS_Store', '._', 'Thumbs.db']
+                for root, dirs, files in os.walk(assets_path):
+                    dirs[:] = [d for d in dirs if not any(d.startswith(p) or d == p for p in exclude_patterns)]
+                    for file in files:
+                        if not any(file.startswith(p) or file == p for p in exclude_patterns):
+                            file_path = os.path.join(root, file)
+                            rel_path = os.path.relpath(file_path, ctk_path)
+                            filtered_files.append((file_path, os.path.join('customtkinter', rel_path)))
+                return filtered_files if filtered_files else [(assets_path, 'customtkinter/assets')]
         except:
             pass
     return []
