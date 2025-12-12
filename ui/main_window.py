@@ -2,9 +2,12 @@
 import customtkinter as ctk
 from tkinter import filedialog
 from tkinter import PhotoImage
+from tkinter import messagebox
+from tkinter import Menu
 import threading
 import os
 import sys
+import json
 from core.parser import IPParser
 from core.matcher import Matcher
 from ui.input_panel import InputPanel
@@ -27,6 +30,10 @@ class MainWindow:
         self.reference_cache = None  # Reference 파싱 캐시
         self._last_reference_text = ''  # 마지막 Reference 텍스트 (캐시 무효화용)
         
+        # 실행 경로 설정 (JSON 저장 위치)
+        self._setup_app_path()
+        
+        self.setup_menu()
         self.setup_ui()
     
     def setup_window(self):
@@ -95,6 +102,40 @@ class MainWindow:
         x = (self.root.winfo_screenwidth() // 2) - (width // 2)
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f'{width}x{height}+{x}+{y}')
+    
+    def _setup_app_path(self):
+        """실행 경로 설정"""
+        if getattr(sys, 'frozen', False):
+            # PyInstaller로 빌드된 경우
+            self.app_path = os.path.dirname(sys.executable)
+        else:
+            # 개발 환경
+            self.app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        # JSON 파일 경로
+        self.reference_json_path = os.path.join(self.app_path, 'reference_data.json')
+    
+    def setup_menu(self):
+        """메뉴바 설정"""
+        # tkinter 메뉴바 생성 (CTk는 메뉴바를 직접 지원하지 않으므로 tkinter 사용)
+        menubar = Menu(self.root)
+        
+        # File 메뉴
+        file_menu = Menu(menubar, tearoff=0)
+        file_menu.add_command(label="Reference 저장", command=self.save_reference)
+        file_menu.add_command(label="Reference 불러오기", command=self.load_reference)
+        file_menu.add_separator()
+        file_menu.add_command(label="종료", command=self.root.quit)
+        
+        # Info 메뉴
+        info_menu = Menu(menubar, tearoff=0)
+        info_menu.add_command(label="정보", command=self.show_info)
+        
+        menubar.add_cascade(label="파일", menu=file_menu)
+        menubar.add_cascade(label="정보", menu=info_menu)
+        
+        # 메뉴바 설정
+        self.root.config(menu=menubar)
     
     def setup_ui(self):
         """UI 구성 - 3열 레이아웃"""
@@ -483,6 +524,98 @@ class MainWindow:
         """윈도우 닫기"""
         # 기본 타이틀 바를 사용하므로 별도 처리 불필요
         pass
+    
+    def save_reference(self):
+        """Reference 데이터를 JSON 파일로 저장"""
+        try:
+            reference_text = self.reference_panel.get_text_content().strip()
+            
+            if not reference_text:
+                messagebox.showwarning("경고", "저장할 Reference 데이터가 없습니다.")
+                return
+            
+            # JSON 데이터 구성
+            data = {
+                "reference_text": reference_text,
+                "saved_at": os.path.getmtime(self.reference_json_path) if os.path.exists(self.reference_json_path) else None
+            }
+            
+            # JSON 파일로 저장
+            with open(self.reference_json_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            messagebox.showinfo("저장 완료", f"Reference 데이터가 저장되었습니다.\n경로: {self.reference_json_path}")
+            self.progress_label.configure(
+                text=f"Reference 저장됨",
+                text_color=("#059669", "#059669")
+            )
+            
+        except Exception as e:
+            error_msg = f"저장 오류: {str(e)}"
+            messagebox.showerror("오류", error_msg)
+            print(error_msg)
+    
+    def load_reference(self):
+        """JSON 파일에서 Reference 데이터 불러오기"""
+        try:
+            if not os.path.exists(self.reference_json_path):
+                messagebox.showwarning("경고", f"저장된 Reference 파일을 찾을 수 없습니다.\n경로: {self.reference_json_path}")
+                return
+            
+            # JSON 파일 읽기
+            with open(self.reference_json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            reference_text = data.get("reference_text", "")
+            
+            if not reference_text:
+                messagebox.showwarning("경고", "저장된 데이터가 비어있습니다.")
+                return
+            
+            # Reference 패널에 데이터 로드
+            self.reference_panel.textbox.delete("1.0", "end")
+            self.reference_panel.textbox.insert("1.0", reference_text)
+            self.reference_panel.update_count()
+            
+            # 캐시 무효화
+            self.reference_cache = None
+            self._last_reference_text = ''
+            
+            # 데이터 변경 이벤트 호출
+            self.on_data_change()
+            
+            messagebox.showinfo("불러오기 완료", "Reference 데이터를 불러왔습니다.")
+            self.progress_label.configure(
+                text=f"Reference 불러옴",
+                text_color=("#059669", "#059669")
+            )
+            
+        except json.JSONDecodeError as e:
+            error_msg = f"JSON 파싱 오류: {str(e)}"
+            messagebox.showerror("오류", error_msg)
+            print(error_msg)
+        except Exception as e:
+            error_msg = f"불러오기 오류: {str(e)}"
+            messagebox.showerror("오류", error_msg)
+            print(error_msg)
+    
+    def show_info(self):
+        """정보 다이얼로그 표시"""
+        info_text = """IP Network Matcher
+
+버전: 1.0.0
+
+이 프로그램은 IP 주소와 네트워크 대역을 매칭하는 도구입니다.
+
+주요 기능:
+• IP 주소와 네트워크 대역 매칭
+• CIDR, IP Range 지원
+• 결과를 엑셀로 내보내기
+• Reference 데이터 저장/불러오기
+
+개발자: IP Network Matcher Team
+"""
+        messagebox.showinfo("정보", info_text)
     
     def run(self):
         """애플리케이션 실행"""
