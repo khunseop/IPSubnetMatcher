@@ -37,7 +37,7 @@ class MainWindow:
         self.set_icon()
         
         # 윈도우 크기 (최대 컴팩트)
-        self.root.geometry("900x600")
+        self.root.geometry("750x450")
         self.root.minsize(750, 450)
         
         # 창 크기 조절 가능하게 설정
@@ -64,13 +64,24 @@ class MainWindow:
                 # 개발 환경
                 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             
-            icon_path = os.path.join(base_path, 'icons8-비교-50.png')
+            icon_path = os.path.join(base_path, 'icons8-비교-50.ico')
             
             if os.path.exists(icon_path):
-                # PNG 파일을 PhotoImage로 로드
-                icon_image = PhotoImage(file=icon_path)
-                # customtkinter는 내부적으로 tkinter를 사용하므로 iconphoto 사용
-                self.root.iconphoto(False, icon_image)
+                # Windows에서는 iconbitmap으로 ICO 파일 직접 사용
+                if sys.platform == 'win32':
+                    self.root.iconbitmap(icon_path)
+                else:
+                    # macOS/Linux에서는 PhotoImage로 ICO 파일 로드 시도
+                    # ICO 파일은 PhotoImage로 직접 로드할 수 없으므로
+                    # iconphoto를 사용하여 시도
+                    try:
+                        # PIL/Pillow를 사용하여 ICO를 로드할 수 있지만,
+                        # 기본 tkinter만 사용하는 경우를 위해 예외 처리
+                        icon_image = PhotoImage(file=icon_path)
+                        self.root.iconphoto(False, icon_image)
+                    except:
+                        # ICO 파일을 직접 로드할 수 없는 경우 무시
+                        pass
         except Exception as e:
             # 아이콘 설정 실패해도 앱은 정상 작동
             print(f"아이콘 설정 실패: {e}")
