@@ -22,7 +22,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=find_customtkinter_assets(),  # customtkinter assets 포함
+    datas=find_customtkinter_assets() + [('icons8-비교-50.png', '.')],  # customtkinter assets 및 아이콘 파일 포함
     hiddenimports=[
         'customtkinter',
         'openpyxl',
@@ -63,6 +63,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # 아이콘 파일이 있으면 경로 지정
+    icon='icons8-비교-50.png',  # 아이콘 파일 경로 지정 (PNG는 Windows에서 .ico로 변환 필요할 수 있음)
 )
 

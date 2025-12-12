@@ -1,7 +1,10 @@
 """메인 윈도우 모듈 - 3열 레이아웃"""
 import customtkinter as ctk
 from tkinter import filedialog
+from tkinter import PhotoImage
 import threading
+import os
+import sys
 from core.parser import IPParser
 from core.matcher import Matcher
 from ui.input_panel import InputPanel
@@ -30,6 +33,9 @@ class MainWindow:
         """윈도우 설정 및 커스터마이징"""
         # 기본 타이틀 바 유지 (크기 조절 및 최소화 기능을 위해)
         
+        # 아이콘 설정
+        self.set_icon()
+        
         # 윈도우 크기 (최대 컴팩트)
         self.root.geometry("900x600")
         self.root.minsize(750, 450)
@@ -46,6 +52,28 @@ class MainWindow:
         
         # 배경색 설정 (미니멀)
         self.root.configure(bg="#ffffff")
+    
+    def set_icon(self):
+        """윈도우 아이콘 설정"""
+        try:
+            # 아이콘 파일 경로 찾기 (실행 파일 위치 또는 스크립트 위치 기준)
+            if getattr(sys, 'frozen', False):
+                # PyInstaller로 빌드된 경우
+                base_path = sys._MEIPASS
+            else:
+                # 개발 환경
+                base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
+            icon_path = os.path.join(base_path, 'icons8-비교-50.png')
+            
+            if os.path.exists(icon_path):
+                # PNG 파일을 PhotoImage로 로드
+                icon_image = PhotoImage(file=icon_path)
+                # customtkinter는 내부적으로 tkinter를 사용하므로 iconphoto 사용
+                self.root.iconphoto(False, icon_image)
+        except Exception as e:
+            # 아이콘 설정 실패해도 앱은 정상 작동
+            print(f"아이콘 설정 실패: {e}")
     
     
     def center_window(self):
